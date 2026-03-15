@@ -29,7 +29,15 @@ let state = {
     happiness: 100,
     energy: 100,
     isSleeping: false,
-    currentAction: null // 'eating', 'playing', etc.
+    currentAction: null, // 'eating', 'playing', etc.
+    personality: 'normal'
+};
+
+const personalities = {
+    normal: { hungerDecay: -2, happinessDecay: -1, energyDecay: -1, playEnergyReq: 20, playEnergyCost: -20, playHappinessGain: 40, feedHungerGain: 30 },
+    energetic: { hungerDecay: -2.5, happinessDecay: -1.5, energyDecay: -2, playEnergyReq: 15, playEnergyCost: -15, playHappinessGain: 60, feedHungerGain: 30 },
+    lazy: { hungerDecay: -1.5, happinessDecay: -1, energyDecay: -0.5, playEnergyReq: 30, playEnergyCost: -30, playHappinessGain: 20, feedHungerGain: 30 },
+    glutton: { hungerDecay: -4, happinessDecay: -1, energyDecay: -1, playEnergyReq: 20, playEnergyCost: -20, playHappinessGain: 30, feedHungerGain: 50 },
 };
 
 // Removed Pet Assets 2D Image Object
@@ -44,6 +52,16 @@ function init() {
     btnFeed.addEventListener('click', feedPet);
     btnPlay.addEventListener('click', playPet);
     btnSleep.addEventListener('click', toggleSleep);
+
+    const selectPersonality = document.getElementById('select-personality');
+    if (selectPersonality) {
+        selectPersonality.addEventListener('change', (e) => {
+            state.personality = e.target.value;
+            if (window.setDogPersonality) {
+                window.setDogPersonality(state.personality);
+            }
+        });
+    }
 
     // Sliders Event Listeners
     setupSlider(sliderBody, valBody, 'body');
@@ -68,6 +86,7 @@ function setupSlider(slider, labelElement, paramName) {
 
 // Game Loop: decrease stats over time
 function gameTick() {
+    const p = personalities[state.personality] || personalities.normal;
     if (state.isSleeping) {
         // Recovers energy while sleeping, hunger drops slower, happiness drops
         modifyStat('energy', 5);
@@ -75,9 +94,9 @@ function gameTick() {
         modifyStat('happiness', -0.2);
     } else {
         // Normal degradation
-        modifyStat('hunger', -2);
-        modifyStat('happiness', -1);
-        modifyStat('energy', -1);
+        modifyStat('hunger', p.hungerDecay);
+        modifyStat('happiness', p.happinessDecay);
+        modifyStat('energy', p.energyDecay);
     }
 
     checkPetState();
@@ -127,8 +146,10 @@ function feedPet() {
     state.currentAction = 'feeding';
     disableButtons(true);
 
+    const p = personalities[state.personality] || personalities.normal;
+
     // Action Logic
-    modifyStat('hunger', 30);
+    modifyStat('hunger', p.feedHungerGain);
     window.setDogAnimation('happy');
 
     // End action after short delay
@@ -142,7 +163,9 @@ function feedPet() {
 function playPet() {
     if (state.isSleeping || state.currentAction) return;
 
-    if (state.energy < 20) {
+    const p = personalities[state.personality] || personalities.normal;
+
+    if (state.energy < p.playEnergyReq) {
         // Too tired to play
         alert("Pet is too tired to play! Let it sleep.");
         return;
@@ -151,8 +174,8 @@ function playPet() {
     state.currentAction = 'playing';
     disableButtons(true);
 
-    modifyStat('happiness', 40);
-    modifyStat('energy', -20);
+    modifyStat('happiness', p.playHappinessGain);
+    modifyStat('energy', p.playEnergyCost);
     modifyStat('hunger', -10);
     window.setDogAnimation('happy');
 

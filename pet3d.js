@@ -186,6 +186,11 @@ tailGroup.add(tail);
 let clock = new THREE.Clock();
 let currentAnim = 'idle';
 let animTime = 0;
+window.currentPersonality = 'normal';
+
+window.setDogPersonality = function (p) {
+    window.currentPersonality = p;
+};
 
 window.setDogAnimation = function (animName) {
     currentAnim = animName;
@@ -286,7 +291,13 @@ function animate() {
     requestAnimationFrame(animate);
 
     let delta = clock.getDelta();
-    animTime += delta;
+
+    let speedMulti = 1.0;
+    if (window.currentPersonality === 'energetic') speedMulti = 1.5;
+    else if (window.currentPersonality === 'lazy') speedMulti = 0.5;
+    else if (window.currentPersonality === 'glutton') speedMulti = 1.1;
+
+    animTime += delta * speedMulti;
 
     if (currentAnim === 'idle') {
         // Breathing
