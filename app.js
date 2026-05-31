@@ -35,6 +35,18 @@ const petThoughtBubble = document.getElementById('pet-thought-bubble');
 const thoughtText = document.getElementById('thought-text');
 const quickPromptChips = document.querySelectorAll('.prompt-chip');
 
+// Modals elements
+const btnOpenCare = document.getElementById('btn-open-care');
+const btnOpenPersonality = document.getElementById('btn-open-personality');
+const modalCare = document.getElementById('modal-care');
+const modalPersonality = document.getElementById('modal-personality');
+const btnCloseCare = document.getElementById('btn-close-care');
+const btnClosePersonality = document.getElementById('btn-close-personality');
+
+// Name Input elements
+const inputPetName = document.getElementById('input-pet-name');
+const btnSaveName = document.getElementById('btn-save-name');
+
 // Constants
 const MAX_STAT = 100;
 const LOW_THRESH = 30;
@@ -56,8 +68,9 @@ const personalities = {
     glutton: { hungerDecay: -4, happinessDecay: -1, energyDecay: -1, playEnergyReq: 20, playEnergyCost: -20, playHappinessGain: 30, feedHungerGain: 50 },
 };
 
-// AI & Speech variables
+// AI, Name & Speech variables
 let apiKey = localStorage.getItem('gemini_api_key') || '';
+let petName = localStorage.getItem('pet_name') || 'ポチ';
 let speechEnabled = true;
 let recognition;
 let isRecording = false;
@@ -67,17 +80,21 @@ let lastActiveTime = Date.now();
 function init() {
     updateUI();
     updateApiKeyUI();
+    updatePetNameUI();
     
     // Start game loop: ticks every 3 seconds
     setInterval(gameTick, 3000);
     // Spontaneous thought checker: runs every 5 seconds
     setInterval(checkInactivityForThought, 5000);
 
-    // Event Listeners
+    // Event Listeners for Care & Status
     btnFeed.addEventListener('click', feedPet);
     btnPlay.addEventListener('click', playPet);
     btnSleep.addEventListener('click', toggleSleep);
-    btnBone.addEventListener('click', throwBoneAction);
+    btnBone.addEventListener('click', () => {
+        modalCare.classList.add('hidden');
+        throwBoneAction();
+    });
 
     const selectPersonality = document.getElementById('select-personality');
     if (selectPersonality) {
@@ -90,11 +107,62 @@ function init() {
         });
     }
 
+    // Modal Control Listeners
+    btnOpenCare.addEventListener('click', () => {
+        modalCare.classList.remove('hidden');
+        resetInactivityTimer();
+    });
+    
+    btnOpenPersonality.addEventListener('click', () => {
+        modalPersonality.classList.remove('hidden');
+        resetInactivityTimer();
+    });
+    
+    btnCloseCare.addEventListener('click', () => {
+        modalCare.classList.add('hidden');
+    });
+    
+    btnClosePersonality.addEventListener('click', () => {
+        modalPersonality.classList.add('hidden');
+    });
+    
+    // Light dismiss clicks (close overlay if clicking backdrop)
+    modalCare.addEventListener('click', (e) => {
+        if (e.target === modalCare) {
+            modalCare.classList.add('hidden');
+        }
+    });
+    
+    modalPersonality.addEventListener('click', (e) => {
+        if (e.target === modalPersonality) {
+            modalPersonality.classList.add('hidden');
+        }
+    });
+
     // Sliders Event Listeners
     setupSlider(sliderBody, valBody, 'body');
     setupSlider(sliderHead, valHead, 'head');
     setupSlider(sliderEars, valEars, 'ears');
     setupSlider(sliderLegs, valLegs, 'legs');
+
+    // Pet Name Saving Listener
+    btnSaveName.addEventListener('click', () => {
+        const name = inputPetName.value.trim();
+        if (name) {
+            petName = name;
+            localStorage.setItem('pet_name', petName);
+            updatePetNameUI();
+            
+            appendChatMessage('pet', `ワンッ！新しい名前「${petName}」にしてくれてありがとうだワン！🐾`);
+            speakText(`新しい名前、${petName}にしてくれてありがとうだワン！`);
+            
+            // Auto close modal to show title transition
+            setTimeout(() => {
+                modalPersonality.classList.add('hidden');
+            }, 1200);
+        }
+        resetInactivityTimer();
+    });
 
     // AI Chat Panel Event Listeners
     btnToggleKey.addEventListener('click', () => {
@@ -203,12 +271,10 @@ function setupSlider(slider, labelElement, paramName) {
 function gameTick() {
     const p = personalities[state.personality] || personalities.normal;
     if (state.isSleeping) {
-        // Recovers energy while sleeping, hunger drops slower, happiness drops
         modifyStat('energy', 5);
         modifyStat('hunger', -0.5);
         modifyStat('happiness', -0.2);
     } else {
-        // Normal degradation
         modifyStat('hunger', p.hungerDecay);
         modifyStat('happiness', p.happinessDecay);
         modifyStat('energy', p.energyDecay);
@@ -242,12 +308,8 @@ function updateBar(element, value) {
     }
 }
 
-// Automatically change pet emotion/animation based on low stats if not busy
 function checkPetState() {
     if (state.currentAction || state.isSleeping) return;
-
-    // Reset animation if stats are normal, or play sadder animations if very low (future expansions)
-    // currently pet3d handles base idle/sleep/happy.
 }
 
 // Actions
@@ -261,9 +323,13 @@ function feedPet() {
     modifyStat('hunger', p.feedHungerGain);
     window.setDogAnimation('happy');
     
-    appendChatMessage('pet', 'モグモグ…美味しいワン！🍖');
+    appendChatMessage('pet', `モグモグ…美味しいワン！🍖`);
     speakText('モグモグ、美味しいワン！');
     resetInactivityTimer();
+
+    setTimeout(() => {
+        modalCare.classList.add('hidden');
+    }, 500);
 
     setTimeout(() => {
         state.currentAction = null;
@@ -290,9 +356,13 @@ function playPet() {
     modifyStat('hunger', -10);
     window.setDogAnimation('happy');
 
-    appendChatMessage('pet', 'わーい！楽しいワン！🎾');
+    appendChatMessage('pet', `わーい！楽しいワン！🎾`);
     speakText('わーい！楽しいワン！');
     resetInactivityTimer();
+
+    setTimeout(() => {
+        modalCare.classList.add('hidden');
+    }, 500);
 
     setTimeout(() => {
         state.currentAction = null;
@@ -307,13 +377,17 @@ function toggleSleep() {
     state.isSleeping = !state.isSleeping;
     resetInactivityTimer();
 
+    setTimeout(() => {
+        modalCare.classList.add('hidden');
+    }, 500);
+
     if (state.isSleeping) {
         window.setDogAnimation('sleep');
         btnFeed.disabled = true;
         btnPlay.disabled = true;
         btnBone.disabled = true;
         btnSleep.innerHTML = '<span class="icon">☀️</span> Wake Up';
-        appendChatMessage('pet', 'うにゃあ…おやすみワン…💤');
+        appendChatMessage('pet', `うにゃあ…おやすみワン…💤`);
         speakText('うにゃあ、おやすみワン');
     } else {
         window.setDogAnimation('idle');
@@ -321,7 +395,7 @@ function toggleSleep() {
         btnPlay.disabled = false;
         btnBone.disabled = false;
         btnSleep.innerHTML = '<span class="icon">💤</span> Sleep';
-        appendChatMessage('pet', 'ふわぁ！おはようワン！☀️');
+        appendChatMessage('pet', `ふわぁ！おはようワン！☀️`);
         speakText('ふわぁ、おはようワン！');
     }
 }
@@ -341,22 +415,19 @@ function throwBoneAction() {
 
     appendChatMessage('user', '🦴 骨を投げた！');
     
-    // Play fetch animation timeline in Three.js
     if (window.setDogAnimation) {
         window.setDogAnimation('fetch');
     }
 
     setTimeout(() => {
-        // Send automatic fetch prompt to Gemini to comment on the success
         if (apiKey) {
-            submitMessageSilent("投げられた骨を口でくわえて持ってきました！大はしゃぎして戻ってきた今の気持ちを喋って！");
+            submitMessageSilent(`投げられた骨を口でくわえて持ってきました！大はしゃぎして戻ってきた今の気持ちを${petName}として誇らしく喋って！`);
         } else {
-            appendChatMessage('pet', 'ワンワンッ！骨を取ってきたワン！うれしいワン！🐾');
+            appendChatMessage('pet', `ワンワンッ！骨を取ってきたワン！うれしいワン！🐾`);
             speakText('ワンワンッ！骨を取ってきたワン！うれしいワン！');
         }
     }, 1000);
 
-    // End busy state after animation completes
     setTimeout(() => {
         state.currentAction = null;
         disableButtons(false);
@@ -372,6 +443,17 @@ function updateApiKeyUI() {
     } else {
         activeDot.classList.remove('active');
         btnToggleKey.innerText = "🔑 Enter Key";
+    }
+}
+
+// Name UI updates
+function updatePetNameUI() {
+    const headerTitle = document.querySelector('header h1');
+    if (headerTitle) {
+        headerTitle.innerText = `${petName}の部屋`;
+    }
+    if (inputPetName) {
+        inputPetName.value = petName;
     }
 }
 
@@ -395,7 +477,6 @@ function appendChatMessage(sender, text) {
     messageDiv.appendChild(contentDiv);
     chatLog.appendChild(messageDiv);
     
-    // Auto Scroll to bottom
     chatLog.scrollTop = chatLog.scrollHeight;
 }
 
@@ -409,17 +490,16 @@ function resetInactivityTimer() {
 function checkInactivityForThought() {
     if (!apiKey || state.isSleeping || state.currentAction) return;
 
-    // 35 seconds of no activity triggers a thought
     if (Date.now() - lastActiveTime > 35000) {
-        resetInactivityTimer(); // Avoid loops
+        resetInactivityTimer();
         triggerSpontaneousThought();
     }
 }
 
 async function triggerSpontaneousThought() {
-    const prompt = "現在のステータスとあなたの性格を考慮して、ふと考えたことや今したいことを、犬としての可愛い独り言（1文、15文字以内）でつぶやいてください。";
+    const prompt = `現在のステータスとあなたの性格を考慮して、ふと考えたことや今したいことを、犬（${petName}）としての可愛い独り言（1文、15文字以内）でつぶやいてください。`;
     
-    const response = await getGeminiResponse(prompt, true); // silent parameter avoids double printing user prompt
+    const response = await getGeminiResponse(prompt, true);
     if (response && response.reply) {
         showThoughtBubble(response.reply);
         
@@ -435,7 +515,6 @@ function showThoughtBubble(text) {
     thoughtText.innerText = text;
     petThoughtBubble.classList.remove('hidden');
     
-    // Auto-hide after 8 seconds
     setTimeout(hideThoughtBubble, 8000);
 }
 
@@ -447,6 +526,9 @@ function hideThoughtBubble() {
 async function submitMessage(text) {
     resetInactivityTimer();
     appendChatMessage('user', text);
+
+    modalCare.classList.add('hidden');
+    modalPersonality.classList.add('hidden');
 
     if (!apiKey) {
         keyConfigContainer.classList.remove('hidden');
@@ -464,15 +546,11 @@ async function submitMessage(text) {
 
     if (response) {
         appendChatMessage('pet', response.reply);
-        
-        // Trigger speech synthesis
         speakText(response.reply);
 
-        // Update dog animations
         if (response.animation && window.setDogAnimation) {
             window.setDogAnimation(response.animation);
             
-            // Sync isSleeping toggle
             if (response.animation === 'sleep' && !state.isSleeping) {
                 toggleSleep();
             } else if (response.animation !== 'sleep' && state.isSleeping) {
@@ -480,12 +558,10 @@ async function submitMessage(text) {
             }
         }
 
-        // Apply 3D shape changes
         if (response.shapeChange) {
             applyShapeChanges(response.shapeChange);
         }
 
-        // Apply stat modifications
         if (response.statEffect) {
             if (response.statEffect.hunger) modifyStat('hunger', response.statEffect.hunger);
             if (response.statEffect.happiness) modifyStat('happiness', response.statEffect.happiness);
@@ -494,7 +570,6 @@ async function submitMessage(text) {
     }
 }
 
-// Silent submit used for automatic actions (like Bone comments)
 async function submitMessageSilent(hiddenSystemPrompt) {
     if (!apiKey) return;
     
@@ -514,7 +589,6 @@ async function submitMessageSilent(hiddenSystemPrompt) {
     }
 }
 
-// Sync Gemini shape changes back to UI sliders
 function applyShapeChanges(shape) {
     if (shape.body !== undefined) {
         sliderBody.value = shape.body;
@@ -543,6 +617,9 @@ async function getGeminiResponse(userPrompt, isThought = false) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
     const sysPrompt = `あなたはユーザーの飼っている可愛くてフレンドリーな3Dバーチャルペット（犬）です。
+あなた自身の名前は「${petName}」です。ユーザーはあなたの飼い主です。
+自分の名前（${petName}）を強く自覚し、自分の名前を聞かれたら「ぼくの名前は${petName}だワン！」のように自己紹介してください。
+
 ユーザーと自然な日本語で対話してください。返答は親しみやすく、犬らしく「ワン！」や「〜だワン」といった表現を適度に交えて、1〜3文程度で簡潔に話してください。
 
 現在のあなたのステータス：
@@ -642,10 +719,9 @@ shapeChangeオプション（全て0.5〜2.0などの倍率数値、指定しな
         return JSON.parse(responseText);
     } catch (error) {
         console.error("Gemini API request failed:", error);
-        // Fallback response if thought or if connection issues
         if (isThought) return null;
         return {
-            reply: "クーン…頭がぼーっとするワン。ネットワークがおかしいかもしれないワン…🐶",
+            reply: `クーン…頭がぼーっとするワン。ネットワークがおかしいかもしれないワン…🐶`,
             animation: "idle"
         };
     }
@@ -655,16 +731,12 @@ shapeChangeオプション（全て0.5〜2.0などの倍率数値、指定しな
 function speakText(text) {
     if (!speechEnabled) return;
     
-    // Web Speech synthesis cancel active utterances
     window.speechSynthesis.cancel();
-    
-    // Strip emojis for better pronunciation
     const cleanText = text.replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDC00-\uDFFF]/g, "");
     
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = 'ja-JP';
     
-    // Tweak pitch/rate based on personality
     let pitch = 1.3;
     let rate = 1.15;
     
