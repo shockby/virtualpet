@@ -51,6 +51,61 @@
                 <button id="btn-sleep" class="action-btn btn-sleep">
                     <span class="icon">💤</span> Sleep
                 </button>
+                <button id="btn-bone" class="action-btn btn-bone">
+                    <span class="icon">🦴</span> Bone
+                </button>
+            </div>
+
+            <!-- AI Chat Console -->
+            <div class="chat-console">
+                <div class="chat-header">
+                    <h4>AI Chat with Pet <span class="active-dot" id="active-dot"></span></h4>
+                    <button id="btn-toggle-key" class="icon-btn-text">🔑 Config Key</button>
+                </div>
+                
+                <!-- API Key Config Area (Collapsible) -->
+                <div id="key-config-container" class="key-config-container hidden">
+                    <p class="config-desc">Google AI StudioのAPIキーを入力してください（キーはローカルブラウザにのみ保存されます）:</p>
+                    <div class="key-input-row">
+                        <input type="password" id="input-api-key" placeholder="AI Studio API Key...">
+                        <button id="btn-save-key">Save</button>
+                    </div>
+                    <a href="https://aistudio.google.com/" target="_blank" class="key-link">🔑 APIキーを無料で取得する (Google AI Studio) &rarr;</a>
+                </div>
+
+                <!-- Spontaneous thought bubble -->
+                <div id="pet-thought-bubble" class="thought-bubble hidden">
+                    <p id="thought-text"></p>
+                </div>
+
+                <!-- Chat History Log -->
+                <div class="chat-log" id="chat-log">
+                    <div class="chat-message pet">
+                        <div class="message-content">ワンワン！ぼくとお話ししようワン！🐾</div>
+                    </div>
+                </div>
+
+                <!-- Typing / Thinking Indicator -->
+                <div id="thinking-indicator" class="thinking-indicator hidden">
+                    <span></span><span></span><span></span>
+                </div>
+
+                <!-- Chat Input Row -->
+                <form id="chat-form" class="chat-input-row">
+                    <button type="button" id="btn-mic" class="mic-btn" title="音声入力">🎙️</button>
+                    <input type="text" id="chat-input" placeholder="話しかけてみてね..." autocomplete="off">
+                    <button type="button" id="btn-tts" class="tts-btn active" title="音声読み上げ">🔊</button>
+                    <button type="submit" id="btn-send" class="send-btn">💬</button>
+                </form>
+
+                <!-- Quick Prompt Suggestions -->
+                <div class="quick-prompts">
+                    <button type="button" class="prompt-chip" data-prompt="お手！">👋 お手！</button>
+                    <button type="button" class="prompt-chip" data-prompt="待て！">✨ 待て！</button>
+                    <button type="button" class="prompt-chip" data-prompt="骨を投げて！">🦴 骨投げ</button>
+                    <button type="button" class="prompt-chip" data-prompt="大きくなーれ！">🦁 巨大化！</button>
+                    <button type="button" class="prompt-chip" data-prompt="ちっちゃくなって！">🐭 小型化！</button>
+                </div>
             </div>
 
             <!-- Personality Panel -->

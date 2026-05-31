@@ -182,10 +182,29 @@ tail.rotation.x = -0.5;
 tailGroup.add(tail);
 
 
+// --- Bone Mesh ---
+const boneGroup = new THREE.Group();
+const boneMat = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.9, metalness: 0.05 });
+const boneShaftGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.8, 16);
+const shaft = new THREE.Mesh(boneShaftGeo, boneMat);
+shaft.rotation.z = Math.PI / 2;
+boneGroup.add(shaft);
+
+const jointGeo = new THREE.SphereGeometry(0.18, 16, 16);
+const j1 = new THREE.Mesh(jointGeo, boneMat); j1.position.set(-0.4, 0.12, 0.12); boneGroup.add(j1);
+const j2 = new THREE.Mesh(jointGeo, boneMat); j2.position.set(-0.4, -0.12, -0.12); boneGroup.add(j2);
+const j3 = new THREE.Mesh(jointGeo, boneMat); j3.position.set(0.4, 0.12, 0.12); boneGroup.add(j3);
+const j4 = new THREE.Mesh(jointGeo, boneMat); j4.position.set(0.4, -0.12, -0.12); boneGroup.add(j4);
+
+boneGroup.visible = false;
+scene.add(boneGroup);
+
 // === Animation System ===
 let clock = new THREE.Clock();
 let currentAnim = 'idle';
 let animTime = 0;
+let fetchPhase = 'idle';
+let fetchTime = 0;
 window.currentPersonality = 'normal';
 
 window.setDogPersonality = function (p) {
@@ -197,22 +216,26 @@ window.setDogAnimation = function (animName) {
     animTime = 0;
 
     // Reset positions/rotations
-    dogGroup.position.y = 0;
+    dogGroup.position.set(0, 0, 0);
     dogGroup.rotation.set(0, 0, 0);
     headGroup.rotation.set(0, 0, 0);
     tailGroup.rotation.set(0, 0, 0);
     earLGroup.rotation.z = -0.3; earLGroup.rotation.x = 0.2;
     earRGroup.rotation.z = 0.3; earRGroup.rotation.x = 0.2;
-    tongue.scale.set(0.8, 0.3, 1.2); // Hide/show tongue logic
+    tongue.scale.set(0.8, 0.3, 1.2);
 
-    // Eye state logic (blink vs close)
+    // Eye state logic
     eyeL.scale.y = 1;
     eyeR.scale.y = 1;
+
+    // Make sure bone is hidden when changing from fetch to another animation
+    if (animName !== 'fetch') {
+        boneGroup.visible = false;
+    }
 
     if (animName === 'sleep') {
         // Lay down
         dogGroup.position.y = -0.8;
-        dogGroup.rotation.x = 0;
         headGroup.rotation.x = 0.5; // head resting
         headGroup.rotation.z = 0.2;
         // Close eyes
@@ -225,18 +248,41 @@ window.setDogAnimation = function (animName) {
         tailGroup.rotation.x = -0.5;
 
         // Splay legs
-        legFL.rotation.x = -1.0; legFL.position.z = 1.5;
-        legFR.rotation.x = -1.0; legFR.position.z = 1.5;
-        legBL.rotation.x = 1.0; legBL.position.z = -1.5;
-        legBR.rotation.x = 1.0; legBR.position.z = -1.5;
+        legFL.rotation.x = -1.0; legFL.position.z = 1.5; legFL.position.y = 0.5;
+        legFR.rotation.x = -1.0; legFR.position.z = 1.5; legFR.position.y = 0.5;
+        legBL.rotation.x = 1.0; legBL.position.z = -1.5; legBL.position.y = 0.5;
+        legBR.rotation.x = 1.0; legBR.position.z = -1.5; legBR.position.y = 0.5;
 
         tongue.scale.set(0.01, 0.01, 0.01); // Hide tongue
+    } else if (animName === 'sit') {
+        // Sit down
+        dogGroup.position.y = -0.5;
+        legFL.rotation.x = -0.4; legFL.position.z = 1.2; legFL.position.y = 0.5;
+        legFR.rotation.x = -0.4; legFR.position.z = 1.2; legFR.position.y = 0.5;
+        legBL.rotation.x = -1.2; legBL.position.z = -0.8; legBL.position.y = 0.2;
+        legBR.rotation.x = -1.2; legBR.position.z = -0.8; legBR.position.y = 0.2;
+        headGroup.rotation.x = -0.1;
+        tailGroup.rotation.x = -0.3;
+    } else if (animName === 'paw') {
+        // Sit down slightly and raise front left paw
+        dogGroup.position.y = -0.3;
+        legFL.rotation.x = -1.4; legFL.position.y = 1.1; legFL.position.z = 1.2;
+        legFR.rotation.x = 0; legFR.position.y = 0.5; legFR.position.z = 1.0;
+        legBL.rotation.x = -0.8; legBL.position.y = 0.3; legBL.position.z = -0.8;
+        legBR.rotation.x = -0.8; legBR.position.y = 0.3; legBR.position.z = -0.8;
+        headGroup.rotation.z = -0.15; // tilt head cutely
+    } else if (animName === 'fetch') {
+        fetchPhase = 'throwing';
+        fetchTime = 0;
+        boneGroup.visible = true;
+        boneGroup.position.set(0, 5, 8); // Start in front of camera
+        boneGroup.rotation.set(Math.random()*2, Math.random()*2, Math.random()*2);
     } else {
         // Reset legs
-        legFL.rotation.x = 0; legFL.position.z = 1.0;
-        legFR.rotation.x = 0; legFR.position.z = 1.0;
-        legBL.rotation.x = 0; legBL.position.z = -0.8;
-        legBR.rotation.x = 0; legBR.position.z = -0.8;
+        legFL.rotation.x = 0; legFL.position.y = 0.5; legFL.position.z = 1.0;
+        legFR.rotation.x = 0; legFR.position.y = 0.5; legFR.position.z = 1.0;
+        legBL.rotation.x = 0; legBL.position.y = 0.5; legBL.position.z = -0.8;
+        legBR.rotation.x = 0; legBR.position.y = 0.5; legBR.position.z = -0.8;
     }
 };
 
@@ -246,9 +292,7 @@ window.updateDogShape = function (params) {
         let s = params.body;
         body.scale.set(0.9, 0.85, 1.2 * s);
         belly.scale.set(0.8, 0.8, 1.15 * s);
-        // Move tail back further if body is longer
         tailGroup.position.z = -1.8 * s;
-        // Move back legs further back if body is longer
         legBL.position.z = -0.8 * s;
         legBR.position.z = -0.8 * s;
     }
@@ -262,24 +306,23 @@ window.updateDogShape = function (params) {
         let s = params.ears;
         earL.scale.set(0.4, 1.2 * s, 0.8);
         earR.scale.set(0.4, 1.2 * s, 0.8);
-        // Move the visible ear mesh further down so it hangs from the same pivot
         earL.position.y = -0.6 * s;
         earR.position.y = -0.6 * s;
     }
 
     if (params.legs) {
         let s = params.legs;
-        // Scale the legs on the Y axis
         legFL.scale.y = s; legFR.scale.y = s;
         legBL.scale.y = s; legBR.scale.y = s;
-        // Adjust the dog's overall height so it doesn't clip into the floor
-        // Default leg height is 1.0 (at s=1.0)
         let heightDiff = (s - 1.0) * 0.5;
         dogGroup.position.y = heightDiff;
 
-        // When sleeping, counter the height diff so it still lays flat
         if (currentAnim === 'sleep') {
             dogGroup.position.y = -0.8;
+        } else if (currentAnim === 'sit') {
+            dogGroup.position.y = -0.5 + heightDiff;
+        } else if (currentAnim === 'paw') {
+            dogGroup.position.y = -0.3 + heightDiff;
         }
     }
 };
@@ -304,18 +347,11 @@ function animate() {
         body.scale.y = 0.85 + Math.sin(animTime * 2) * 0.02;
         body.scale.x = 0.9 + Math.sin(animTime * 2) * 0.01;
 
-        // Head look around
         headGroup.rotation.y = Math.sin(animTime * 1.5) * 0.15;
         headGroup.rotation.x = Math.sin(animTime * 1.0) * 0.05;
-
-        // Slow tail wag
         tailGroup.rotation.y = Math.sin(animTime * 4) * 0.3;
-
-        // Ear subtle flop
         earLGroup.rotation.z = -0.3 + Math.sin(animTime * 2) * 0.05;
         earRGroup.rotation.z = 0.3 - Math.sin(animTime * 2) * 0.05;
-
-        // Panting tongue
         tongue.scale.z = 1.2 + Math.abs(Math.sin(animTime * 5)) * 0.3;
 
         // Blinking
@@ -330,35 +366,105 @@ function animate() {
     } else if (currentAnim === 'happy') {
         // Jumping up down
         dogGroup.position.y = Math.abs(Math.sin(animTime * 10)) * 1.0;
-
-        // Fast tail wagging
         tailGroup.rotation.y = Math.sin(animTime * 20) * 0.8;
-
-        // Head bobbing and looking up
         headGroup.rotation.x = -0.2 + Math.sin(animTime * 10) * 0.1;
-
-        // floppy ears jumping
         earLGroup.rotation.z = -0.4 + Math.sin(animTime * 10) * 0.2;
         earRGroup.rotation.z = 0.4 - Math.sin(animTime * 10) * 0.2;
 
-        // Happy eyes (curved) -> just close them slightly to look like a smile
         eyeL.scale.y = 0.3;
         eyeR.scale.y = 0.3;
-
-        // Excited panting
         tongue.scale.z = 1.4 + Math.abs(Math.sin(animTime * 15)) * 0.4;
 
     } else if (currentAnim === 'sleep') {
         // Slow shallow breathing
         body.scale.y = 0.85 + Math.sin(animTime * 1.5) * 0.02;
         body.scale.x = 0.9 + Math.sin(animTime * 1.5) * 0.01;
-
-        // Ear breathing drift
         earLGroup.rotation.z = -0.8 + Math.sin(animTime * 1.5) * 0.02;
+
+    } else if (currentAnim === 'sit') {
+        // Breathing
+        body.scale.y = 0.85 + Math.sin(animTime * 2) * 0.02;
+        headGroup.rotation.y = Math.sin(animTime * 1.2) * 0.1;
+        tailGroup.rotation.y = Math.sin(animTime * 3) * 0.15; // slow happy wag
+
+    } else if (currentAnim === 'paw') {
+        // Wave paw slightly
+        legFL.rotation.z = Math.sin(animTime * 8) * 0.1;
+        tailGroup.rotation.y = Math.sin(animTime * 15) * 0.6; // excited wag
+        headGroup.rotation.y = Math.sin(animTime * 1.0) * 0.1;
+
+    } else if (currentAnim === 'fetch') {
+        fetchTime += delta;
+
+        if (fetchPhase === 'throwing') {
+            let t = Math.min(fetchTime / 1.0, 1.0);
+            let start = new THREE.Vector3(0, 5, 8);
+            let end = new THREE.Vector3(0, 0.2, 3);
+            boneGroup.position.x = THREE.MathUtils.lerp(start.x, end.x, t);
+            boneGroup.position.y = THREE.MathUtils.lerp(start.y, end.y, t) + Math.sin(t * Math.PI) * 2.5;
+            boneGroup.position.z = THREE.MathUtils.lerp(start.z, end.z, t);
+            boneGroup.rotation.x += delta * 6;
+            boneGroup.rotation.y += delta * 3;
+
+            // Head looks at bone
+            headGroup.lookAt(boneGroup.position);
+
+            if (t >= 1.0) {
+                fetchPhase = 'grabbing';
+                fetchTime = 0;
+            }
+        } else if (fetchPhase === 'grabbing') {
+            let t = Math.min(fetchTime / 0.8, 1.0);
+            dogGroup.position.z = THREE.MathUtils.lerp(0, 1.6, t);
+
+            // Run cycle
+            legFL.rotation.x = Math.sin(fetchTime * 15) * 0.7;
+            legFR.rotation.x = -Math.sin(fetchTime * 15) * 0.7;
+            legBL.rotation.x = -Math.sin(fetchTime * 15) * 0.7;
+            legBR.rotation.x = Math.sin(fetchTime * 15) * 0.7;
+            tailGroup.rotation.y = Math.sin(fetchTime * 25) * 0.8;
+
+            if (t >= 1.0) {
+                fetchPhase = 'returning';
+                fetchTime = 0;
+            }
+        } else if (fetchPhase === 'returning') {
+            let t = Math.min(fetchTime / 0.9, 1.0);
+            dogGroup.position.z = THREE.MathUtils.lerp(1.6, 0, t);
+
+            // Bone in mouth
+            let snoutWorld = new THREE.Vector3();
+            snout.getWorldPosition(snoutWorld);
+            boneGroup.position.copy(snoutWorld);
+            boneGroup.rotation.copy(headGroup.rotation);
+            boneGroup.rotation.y += Math.PI / 2;
+
+            // Run cycle
+            legFL.rotation.x = Math.sin(fetchTime * 15) * 0.6;
+            legFR.rotation.x = -Math.sin(fetchTime * 15) * 0.6;
+            legBL.rotation.x = -Math.sin(fetchTime * 15) * 0.6;
+            legBR.rotation.x = Math.sin(fetchTime * 15) * 0.6;
+            tailGroup.rotation.y = Math.sin(fetchTime * 25) * 0.8;
+
+            if (t >= 1.0) {
+                fetchPhase = 'happy';
+                fetchTime = 0;
+            }
+        } else if (fetchPhase === 'happy') {
+            boneGroup.visible = false;
+            let t = Math.min(fetchTime / 1.5, 1.0);
+
+            dogGroup.position.y = Math.abs(Math.sin(fetchTime * 10)) * 0.8;
+            tailGroup.rotation.y = Math.sin(fetchTime * 25) * 0.8;
+            headGroup.rotation.x = -0.2 + Math.sin(fetchTime * 10) * 0.1;
+
+            if (t >= 1.0) {
+                window.setDogAnimation('idle');
+            }
+        }
     }
 
-    // Slow Auto-Rotation of the whole object (optional, for viewing)
-    if (currentAnim !== 'sleep') {
+    if (currentAnim !== 'sleep' && currentAnim !== 'fetch') {
         dogGroup.rotation.y = Math.sin(animTime * 0.3) * 0.4;
     }
 
