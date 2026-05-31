@@ -68,13 +68,25 @@ const personalities = {
     glutton: { hungerDecay: -4, happinessDecay: -1, energyDecay: -1, playEnergyReq: 20, playEnergyCost: -20, playHappinessGain: 30, feedHungerGain: 50 },
 };
 
-// AI, Name & Speech variables
 let apiKey = localStorage.getItem('gemini_api_key') || '';
 let petName = localStorage.getItem('pet_name') || 'ポチ';
 let speechEnabled = true;
 let recognition;
 let isRecording = false;
 let lastActiveTime = Date.now();
+let lastThoughtTime = 0; // last time a spontaneous thought triggered
+
+// Daily API quota tracker
+const DAILY_API_LIMIT = 50;
+const today = new Date().toDateString();
+const storedDate = localStorage.getItem('api_date');
+if (storedDate !== today) {
+    localStorage.setItem('api_date', today);
+    localStorage.setItem('api_count', '0');
+}
+function getApiCount() { return parseInt(localStorage.getItem('api_count') || '0', 10); }
+function incrementApiCount() { localStorage.setItem('api_count', String(getApiCount() + 1)); }
+function isApiQuotaOk() { return getApiCount() < DAILY_API_LIMIT; }
 
 // Initialize
 function init() {
@@ -84,8 +96,8 @@ function init() {
     
     // Start game loop: ticks every 3 seconds
     setInterval(gameTick, 3000);
-    // Spontaneous thought checker: runs every 5 seconds
-    setInterval(checkInactivityForThought, 5000);
+    // Spontaneous thought checker: runs every 60 seconds
+    setInterval(checkInactivityForThought, 60000);
 
     // Event Listeners for Care & Status
     btnFeed.addEventListener('click', feedPet);
@@ -486,19 +498,45 @@ function resetInactivityTimer() {
     hideThoughtBubble();
 }
 
+// Local fallback thoughts (no API call)
+const LOCAL_THOUGHTS = {
+    normal:   ['遺んで遺んで遺んでだワン！', 'お手やりたいなワン。', 'お散歩行きたいワン～'],
+    energetic: ['生きてるの最高だワン！！', '走り回りたいワン！', '順調ルンルンワン！！！'],
+    lazy:      ['ふにゃあ～ねむいワン…', 'なんか食べたいワン…', 'ごろごろしたいワン…'],
+    glutton:  ['おなかすいたワン！', 'ほのにおやつ欲しいワン…', 'ごはんまだワン？']
+};
+
 // Spontaneous thoughts timer checker
 function checkInactivityForThought() {
     if (!apiKey || state.isSleeping || state.currentAction) return;
 
-    if (Date.now() - lastActiveTime > 35000) {
-        resetInactivityTimer();
-        triggerSpontaneousThought();
+    const MIN_THOUGHT_INTERVAL = 10 * 60 * 1000; // 10 minutes minimum between API thoughts
+    const now = Date.now();
+
+    if (now - lastActiveTime > 90000) { // 90 seconds of inactivity
+        lastActiveTime = now; // reset so it doesn't fire again immediately
+
+        // Check if enough time has passed AND quota is available for AI thought
+        if (now - lastThoughtTime > MIN_THOUGHT_INTERVAL && isApiQuotaOk()) {
+            lastThoughtTime = now;
+            triggerSpontaneousThought();
+        } else {
+            // Show a local thought without using the API
+            triggerLocalThought();
+        }
     }
 }
 
+function triggerLocalThought() {
+    const pool = LOCAL_THOUGHTS[state.personality] || LOCAL_THOUGHTS.normal;
+    const text = pool[Math.floor(Math.random() * pool.length)];
+    showThoughtBubble(text);
+}
+
 async function triggerSpontaneousThought() {
-    const prompt = `現在のステータスとあなたの性格を考慮して、ふと考えたことや今したいことを、犬（${petName}）としての可愛い独り言（1文、15文字以内）でつぶやいてください。`;
+    const prompt = `現在のステータスとあなたの性格を考慮して、ふと考えたことや今したいことを、犬（${petName}）としての可愛い独り言（1文、5文字以内）でつぶやいてください。`;
     
+    incrementApiCount();
     const response = await getGeminiResponse(prompt, true);
     if (response && response.reply) {
         showThoughtBubble(response.reply);
@@ -540,6 +578,14 @@ async function submitMessage(text) {
     thinkingIndicator.classList.remove('hidden');
     chatLog.scrollTop = chatLog.scrollHeight;
 
+    if (!isApiQuotaOk()) {
+        appendChatMessage('pet', `ふぅ…今日はもうたくさんお話ししたワン（1日${DAILY_API_LIMIT}回まで）。明日また話しかけてワン！🐶`);
+        speakText('今日はもうたくさんお話ししたワン。明日また話しかけてワン');
+        thinkingIndicator.classList.add('hidden');
+        return;
+    }
+
+    incrementApiCount();
     const response = await getGeminiResponse(text);
     
     thinkingIndicator.classList.add('hidden');
@@ -612,56 +658,47 @@ function applyShapeChanges(shape) {
     }
 }
 
+// Model fallback chain for free tier quota management
+const GEMINI_MODELS = [
+    'gemini-2.0-flash-lite',   // 30 RPM free tier (primary)
+    'gemini-1.5-flash',        // 15 RPM free tier (fallback 1)
+    'gemini-1.5-pro',          // 2 RPM free tier (fallback 2)
+];
+
+// Rate limiting: track last request time per model
+const modelLastUsed = {};
+let currentModelIndex = 0;
+
+// Debounce: prevent overlapping requests
+let pendingRequest = null;
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Build API URL for a given model
+function buildApiUrl(model) {
+    return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+}
+
 // Communicate with Google AI Studio Gemini API
 async function getGeminiResponse(userPrompt, isThought = false) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    // Debounce: if a request is already in flight, skip spontaneous thoughts
+    if (pendingRequest && isThought) return null;
 
-    const sysPrompt = `あなたはユーザーの飼っている可愛くてフレンドリーな3Dバーチャルペット（犬）です。
-あなた自身の名前は「${petName}」です。ユーザーはあなたの飼い主です。
-自分の名前（${petName}）を強く自覚し、自分の名前を聞かれたら「ぼくの名前は${petName}だワン！」のように自己紹介してください。
+    const sysPrompt = `あなたは「${petName}」という名前の3Dバーチャルペット（犬）です。飼い主と日本語で自然に会話してください。
+返答は「ワン！」「〜だワン」などの犬らしい表現を交えて1〜3文で簡潔に。
 
-ユーザーと自然な日本語で対話してください。返答は親しみやすく、犬らしく「ワン！」や「〜だワン」といった表現を適度に交えて、1〜3文程度で簡潔に話してください。
+ステータス: Hunger=${state.hunger}/100, Happiness=${state.happiness}/100, Energy=${state.energy}/100, Sleeping=${state.isSleeping}
+性格: ${state.personality} (normal=普通, energetic=ハイテンション!, lazy=のんびり…, glutton=食いしん坊)
 
-現在のあなたのステータス：
-- お腹の空き具合 (Hunger): ${state.hunger}/100
-- 幸福度 (Happiness): ${state.happiness}/100
-- 体力 (Energy): ${state.energy}/100
-- 睡眠状態 (isSleeping): ${state.isSleeping}
+アニメーション選択 (1つ): idle/happy/sleep/paw/sit/fetch
+「骨投げ」「持ってきて」→fetch, 「お手」→paw, 「お座り」「待て」→sit
 
-現在のあなたの性格タイプ: ${state.personality}
-性格ごとの表現：
-- normal: 普通の素直で可愛い犬。
-- energetic: 感嘆符（！）を多く使い、ハイテンションで走り回りたい様子。
-- lazy: 語尾に「〜だワン…」「ふにゃあ…」など、のんびりしていて眠そうな様子。
-- glutton: 食べ物が大好きで、いつも何か食べたそうにしている様子。
+体型変更(省略可): body(0.5-1.5), head(0.7-1.3), ears(0.5-2.0), legs(0.5-1.8)
+ステータス変更(省略可): hunger/happiness/energy の増減値
 
-返答と同時に、あなたの感情や動きに最も合ったアニメーションを1つ選択してください。
-選択可能なアニメーション：
-- "idle" (通常の静止/呼吸/まばたき)
-- "happy" (飛び跳ねて喜ぶ)
-- "sleep" (眠る/伏せをする)
-- "paw" (お手をする)
-- "sit" (お座りして待つ)
-- "fetch" (骨を追いかけて持ってくる)
-
-ユーザーが「骨を投げる」「持ってきて」と言ったり骨を投げた場合は、必ず "fetch" アニメーションを選択してください。
-ユーザーが「お手」と言った場合は、必ず "paw" アニメーションを選択してください。
-ユーザーが「お座り」「待て」と言った場合は、必ず "sit" アニメーションを選択してください。
-
-また、ユーザーの発言や行動に応じて、3Dモデルの体型パラメータを変更できます。
-shapeChangeオプション（全て0.5〜2.0などの倍率数値、指定しないものは省略可能）：
-- body: 胴体の長さ (0.5 〜 1.5)
-- head: 頭の大きさ (0.7 〜 1.3)
-- ears: 耳の長さ (0.5 〜 2.0)
-- legs: 足の長さ (0.5 〜 1.8)
-例：「大きくなーれ！」と言われたらheadを1.3、bodyを1.3、legsを1.3にする等。
-
-ユーザーの言動があなたのステータスに影響を与える場合は、statEffectオプションで数値を指定してください（マイナスも可能）：
-- hunger: 空腹の回復量（例: ごはんを貰ったら +30）
-- happiness: 幸福度の増減（例: 遊んでもらったら +20）
-- energy: 体力の増減（例: 激しく遊んだら -15）
-
-必ず以下のJSONフォーマットのスキーマで厳密に返答してください。`;
+必ずJSONスキーマ通りに返答してください。`;
 
     const requestBody = {
         contents: [
@@ -675,23 +712,23 @@ shapeChangeオプション（全て0.5〜2.0などの倍率数値、指定しな
             responseSchema: {
                 type: "OBJECT",
                 properties: {
-                    reply: { type: "STRING", description: "犬としての可愛らしい日本語の返答テキスト" },
-                    animation: { type: "STRING", enum: ["idle", "happy", "sleep", "paw", "sit", "fetch"], description: "状況に最適なアニメーション" },
+                    reply: { type: "STRING" },
+                    animation: { type: "STRING", enum: ["idle", "happy", "sleep", "paw", "sit", "fetch"] },
                     shapeChange: {
                         type: "OBJECT",
                         properties: {
-                            body: { type: "NUMBER", description: "胴体の長さ (0.5 - 1.5)" },
-                            head: { type: "NUMBER", description: "頭の大きさ (0.7 - 1.3)" },
-                            ears: { type: "NUMBER", description: "耳の長さ (0.5 - 2.0)" },
-                            legs: { type: "NUMBER", description: "足の長さ (0.5 - 1.8)" }
+                            body: { type: "NUMBER" },
+                            head: { type: "NUMBER" },
+                            ears: { type: "NUMBER" },
+                            legs: { type: "NUMBER" }
                         }
                     },
                     statEffect: {
                         type: "OBJECT",
                         properties: {
-                            hunger: { type: "NUMBER", description: "空腹度の増減" },
-                            happiness: { type: "NUMBER", description: "幸福度の増減" },
-                            energy: { type: "NUMBER", description: "体力の増減" }
+                            hunger: { type: "NUMBER" },
+                            happiness: { type: "NUMBER" },
+                            energy: { type: "NUMBER" }
                         }
                     }
                 },
@@ -700,30 +737,73 @@ shapeChangeオプション（全て0.5〜2.0などの倍率数値、指定しな
         }
     };
 
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestBody)
-        });
+    // Try models with exponential backoff on 429
+    const startModelIndex = currentModelIndex;
+    let attempt = 0;
 
-        if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(`API Error: ${response.status} - ${errText}`);
+    pendingRequest = (async () => {
+        while (attempt < GEMINI_MODELS.length * 2) {
+            const model = GEMINI_MODELS[currentModelIndex];
+            const url = buildApiUrl(model);
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (response.status === 429 || response.status === 404) {
+                    // 429: quota exceeded, 404: model not available → try next
+                    console.warn(`[Gemini] ${model} returned ${response.status}, switching model...`);
+                    currentModelIndex = (currentModelIndex + 1) % GEMINI_MODELS.length;
+                    const backoffMs = response.status === 429
+                        ? Math.min(2000 * Math.pow(2, attempt), 30000)
+                        : 500;
+                    console.log(`[Gemini] Retrying with ${GEMINI_MODELS[currentModelIndex]} in ${backoffMs}ms...`);
+                    await sleep(backoffMs);
+                    attempt++;
+                    continue;
+                }
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`API Error: ${response.status} - ${errText}`);
+                }
+
+                const data = await response.json();
+                const responseText = data.candidates[0].content.parts[0].text;
+                return JSON.parse(responseText);
+
+            } catch (error) {
+                if (error.message && error.message.includes('429')) {
+                    currentModelIndex = (currentModelIndex + 1) % GEMINI_MODELS.length;
+                    await sleep(2000 * Math.pow(2, attempt));
+                    attempt++;
+                    continue;
+                }
+                console.error("Gemini API request failed:", error);
+                if (isThought) return null;
+                return {
+                    reply: `クーン…頭がぼーっとするワン。ちょっと待ってほしいワン…🐶`,
+                    animation: "idle"
+                };
+            }
         }
 
-        const data = await response.json();
-        const responseText = data.candidates[0].content.parts[0].text;
-        return JSON.parse(responseText);
-    } catch (error) {
-        console.error("Gemini API request failed:", error);
+        // All models exhausted
+        console.error("[Gemini] All models quota exhausted");
         if (isThought) return null;
         return {
-            reply: `クーン…頭がぼーっとするワン。ネットワークがおかしいかもしれないワン…🐶`,
-            animation: "idle"
+            reply: `ふぅ…今日はたくさんお話ししすぎたワン。また後でお話しようワン！🐶`,
+            animation: "sleep"
         };
+    })();
+
+    try {
+        return await pendingRequest;
+    } finally {
+        pendingRequest = null;
     }
 }
 
