@@ -74,7 +74,8 @@ let speechEnabled = true;
 let recognition;
 let isRecording = false;
 let lastActiveTime = Date.now();
-let lastThoughtTime = 0; // last time a spontaneous thought triggered
+let lastThoughtTime = parseInt(localStorage.getItem('last_thought_time') || '0', 10); // last time a spontaneous thought triggered
+let useLocalMode = localStorage.getItem('use_local_mode') === 'true';
 
 // Daily API quota tracker
 const DAILY_API_LIMIT = 50;
@@ -188,6 +189,17 @@ function init() {
         keyConfigContainer.classList.add('hidden');
         resetInactivityTimer();
     });
+
+    const checkboxLocalMode = document.getElementById('checkbox-local-mode');
+    if (checkboxLocalMode) {
+        checkboxLocalMode.checked = useLocalMode;
+        checkboxLocalMode.addEventListener('change', (e) => {
+            useLocalMode = e.target.checked;
+            localStorage.setItem('use_local_mode', String(useLocalMode));
+            updateApiKeyUI();
+            resetInactivityTimer();
+        });
+    }
 
     chatForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -432,7 +444,7 @@ function throwBoneAction() {
     }
 
     setTimeout(() => {
-        if (apiKey) {
+        if (!useLocalMode && apiKey) {
             submitMessageSilent(`投げられた骨を口でくわえて持ってきました！大はしゃぎして戻ってきた今の気持ちを${petName}として誇らしく喋って！`);
         } else {
             appendChatMessage('pet', `ワンワンッ！骨を取ってきたワン！うれしいワン！🐾`);
@@ -448,12 +460,16 @@ function throwBoneAction() {
 
 // API Key UI toggles
 function updateApiKeyUI() {
-    if (apiKey) {
+    if (useLocalMode || apiKey) {
         activeDot.classList.add('active');
+    } else {
+        activeDot.classList.remove('active');
+    }
+
+    if (apiKey) {
         inputApiKey.value = apiKey;
         btnToggleKey.innerText = "🔑 Change Key";
     } else {
-        activeDot.classList.remove('active');
         btnToggleKey.innerText = "🔑 Enter Key";
     }
 }
@@ -500,15 +516,15 @@ function resetInactivityTimer() {
 
 // Local fallback thoughts (no API call)
 const LOCAL_THOUGHTS = {
-    normal:   ['遺んで遺んで遺んでだワン！', 'お手やりたいなワン。', 'お散歩行きたいワン～'],
+    normal:   ['遊んで遊んで遊んでだワン！', 'お手やりたいなワン。', 'お散歩行きたいワン～'],
     energetic: ['生きてるの最高だワン！！', '走り回りたいワン！', '順調ルンルンワン！！！'],
     lazy:      ['ふにゃあ～ねむいワン…', 'なんか食べたいワン…', 'ごろごろしたいワン…'],
-    glutton:  ['おなかすいたワン！', 'ほのにおやつ欲しいワン…', 'ごはんまだワン？']
+    glutton:  ['おなかすいたワン！', '骨におやつ欲しいワン…', 'ごはんまだワン？']
 };
 
 // Spontaneous thoughts timer checker
 function checkInactivityForThought() {
-    if (!apiKey || state.isSleeping || state.currentAction) return;
+    if (state.isSleeping || state.currentAction) return;
 
     const MIN_THOUGHT_INTERVAL = 10 * 60 * 1000; // 10 minutes minimum between API thoughts
     const now = Date.now();
@@ -516,9 +532,10 @@ function checkInactivityForThought() {
     if (now - lastActiveTime > 90000) { // 90 seconds of inactivity
         lastActiveTime = now; // reset so it doesn't fire again immediately
 
-        // Check if enough time has passed AND quota is available for AI thought
-        if (now - lastThoughtTime > MIN_THOUGHT_INTERVAL && isApiQuotaOk()) {
+        // Check if enough time has passed AND quota is available for AI thought, and not in local mode
+        if (!useLocalMode && apiKey && (now - lastThoughtTime > MIN_THOUGHT_INTERVAL) && isApiQuotaOk()) {
             lastThoughtTime = now;
+            localStorage.setItem('last_thought_time', String(now));
             triggerSpontaneousThought();
         } else {
             // Show a local thought without using the API
@@ -568,22 +585,14 @@ async function submitMessage(text) {
     modalCare.classList.add('hidden');
     modalPersonality.classList.add('hidden');
 
-    if (!apiKey) {
-        keyConfigContainer.classList.remove('hidden');
-        appendChatMessage('pet', '🔑 AIと話すにはAPIキーを設定してワン！Google AI Studioから無料で貰えるワン。');
-        speakText('AIと話すには、エーアイスタジオの、APIキーを設定してワン');
+    // If local mode is forced, or no api key, or daily quota is exceeded, fallback to local response engine
+    if (useLocalMode || !apiKey || !isApiQuotaOk()) {
+        submitLocalMessage(text);
         return;
     }
 
     thinkingIndicator.classList.remove('hidden');
     chatLog.scrollTop = chatLog.scrollHeight;
-
-    if (!isApiQuotaOk()) {
-        appendChatMessage('pet', `ふぅ…今日はもうたくさんお話ししたワン（1日${DAILY_API_LIMIT}回まで）。明日また話しかけてワン！🐶`);
-        speakText('今日はもうたくさんお話ししたワン。明日また話しかけてワン');
-        thinkingIndicator.classList.add('hidden');
-        return;
-    }
 
     incrementApiCount();
     const response = await getGeminiResponse(text);
@@ -616,10 +625,92 @@ async function submitMessage(text) {
     }
 }
 
+// Local offline fallback response engine
+function submitLocalMessage(text) {
+    thinkingIndicator.classList.remove('hidden');
+    
+    setTimeout(() => {
+        thinkingIndicator.classList.add('hidden');
+        
+        let reply = '';
+        let animation = 'idle';
+        
+        const cleanText = text.toLowerCase();
+        
+        // Keyword checks
+        if (cleanText.includes('お手') || cleanText.includes('おて')) {
+            animation = 'paw';
+            reply = 'お手だワン！ほら、できたワン！🐾';
+        } else if (cleanText.includes('お座り') || cleanText.includes('おすわり') || cleanText.includes('待て') || cleanText.includes('まて')) {
+            animation = 'sit';
+            reply = 'お座りして待つワン！おやつある？🦴';
+        } else if (cleanText.includes('骨') || cleanText.includes('投げ') || cleanText.includes('ボール') || cleanText.includes('もってきて')) {
+            // Trigger fetch animation
+            throwBoneAction();
+            return;
+        } else if (cleanText.includes('寝る') || cleanText.includes('おやすみ') || cleanText.includes('眠')) {
+            animation = 'sleep';
+            if (!state.isSleeping) toggleSleep();
+            reply = 'ふにゃあ…おやすみワン。良い夢見るワン…💤';
+        } else if (cleanText.includes('なでなで') || cleanText.includes('可愛い') || cleanText.includes('かわいい') || cleanText.includes('好き')) {
+            animation = 'happy';
+            reply = 'えへへ、なでなで大好きだワン！もっと撫でてワン！💖';
+        } else if (cleanText.includes('名前')) {
+            animation = 'happy';
+            reply = `ぼくの名前は「${petName}」だワン！かっこいい名前で嬉しいワン！🐶`;
+        } else {
+            // Personality-based standard responses
+            const pPool = {
+                normal: [
+                    'ワンワン！今日も一緒にいられて嬉しいワン！',
+                    'クーン…何かおもしろいことないワン？',
+                    'ジー…飼い主さんのこと、じっと見つめてるワン。',
+                    'お腹すいたワン！おやつかご飯ほしいワン！'
+                ],
+                energetic: [
+                    'ワンッ！！もっと走りたいワン！あそぼー！！',
+                    'ルンルン！お外に散歩に行きたいワン！！🐾',
+                    'テンションMAXだワン！飛び跳ねちゃうワン！',
+                    'わーい！楽しいこといっぱいで幸せワン！'
+                ],
+                lazy: [
+                    'ふにゃあ…なんだか、とっても眠いワン…💤',
+                    'のんびり、ごろごろするのが一番だワン…',
+                    'むにゃむにゃ…お昼寝の邪魔はしないでワン…',
+                    'ワン…あ、あくびが出ちゃったワン…ふぁあ'
+                ],
+                glutton: [
+                    'クーン…美味しそうなにおいがするワン！🍖',
+                    'おやつ！おやつどこワン！？早くほしいワン！',
+                    'モグモグ…もっといっぱい食べたいワン！',
+                    'ご飯の時間が一番大好きなんだワン！ヨダレが出ちゃうワン…'
+                ]
+            };
+            
+            const pool = pPool[state.personality] || pPool.normal;
+            reply = pool[Math.floor(Math.random() * pool.length)];
+            animation = Math.random() > 0.5 ? 'happy' : 'idle';
+        }
+        
+        appendChatMessage('pet', reply);
+        speakText(reply);
+        
+        if (window.setDogAnimation) {
+            window.setDogAnimation(animation);
+        }
+    }, 600);
+}
+
 async function submitMessageSilent(hiddenSystemPrompt) {
-    if (!apiKey) return;
+    if (!apiKey || useLocalMode || !isApiQuotaOk()) {
+        // Safe offline response for silent calls (e.g. bone fetched)
+        appendChatMessage('pet', `ワンワンッ！骨を取ってきたワン！うれしいワン！🐾`);
+        speakText('ワンワンッ！骨を取ってきたワン！うれしいワン！');
+        return;
+    }
     
     thinkingIndicator.classList.remove('hidden');
+    incrementApiCount();
     
     const response = await getGeminiResponse(hiddenSystemPrompt);
     
