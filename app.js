@@ -78,7 +78,9 @@ let lastThoughtTime = parseInt(localStorage.getItem('last_thought_time') || '0',
 let useLocalMode = localStorage.getItem('use_local_mode') === 'true';
 
 // Daily API quota tracker
-const DAILY_API_LIMIT = 50;
+// Gemini 2.0 Flash Lite free tier: 1500 RPD (requests per day)
+// We use 500 as a safe daily limit with headroom
+const DAILY_API_LIMIT = 500;
 const today = new Date().toDateString();
 const storedDate = localStorage.getItem('api_date');
 if (storedDate !== today) {
@@ -86,8 +88,15 @@ if (storedDate !== today) {
     localStorage.setItem('api_count', '0');
 }
 function getApiCount() { return parseInt(localStorage.getItem('api_count') || '0', 10); }
-function incrementApiCount() { localStorage.setItem('api_count', String(getApiCount() + 1)); }
+function incrementApiCount() {
+    localStorage.setItem('api_count', String(getApiCount() + 1));
+    updateApiCountDisplay();
+}
 function isApiQuotaOk() { return getApiCount() < DAILY_API_LIMIT; }
+function updateApiCountDisplay() {
+    const el = document.getElementById('api-count-display');
+    if (el) el.textContent = getApiCount();
+}
 
 // Initialize
 function init() {
@@ -200,6 +209,20 @@ function init() {
             resetInactivityTimer();
         });
     }
+
+    // API count reset button
+    const btnResetCount = document.getElementById('btn-reset-count');
+    if (btnResetCount) {
+        btnResetCount.addEventListener('click', () => {
+            localStorage.setItem('api_count', '0');
+            localStorage.setItem('api_date', new Date().toDateString());
+            updateApiCountDisplay();
+            appendChatMessage('pet', 'APIカウンターをリセットしたワン！また話しかけてワン！🐾');
+        });
+    }
+
+    // Initialize count display
+    updateApiCountDisplay();
 
     chatForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -886,7 +909,7 @@ async function getGeminiResponse(userPrompt, isThought = false) {
         console.error("[Gemini] All models quota exhausted");
         if (isThought) return null;
         return {
-            reply: `ふぅ…今日はたくさんお話ししすぎたワン。また後でお話しようワン！🐶`,
+            reply: `ふぅ…今日のAPIがいっぱいになったワン。明日また話しかけてワン！🐶`,
             animation: "sleep"
         };
     })();
