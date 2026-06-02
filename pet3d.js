@@ -610,11 +610,16 @@ window.setPetType = function (type) {
     }
 
     // Trigger update shape size rules
+    const elBody = document.getElementById('slider-body');
+    const elHead = document.getElementById('slider-head');
+    const elEars = document.getElementById('slider-ears');
+    const elLegs = document.getElementById('slider-legs');
+    
     const shapeParams = {
-        body: parseFloat(sliderBody.value),
-        head: parseFloat(sliderHead.value),
-        ears: parseFloat(sliderEars.value),
-        legs: parseFloat(sliderLegs.value)
+        body: elBody ? parseFloat(elBody.value) : 1.0,
+        head: elHead ? parseFloat(elHead.value) : 1.0,
+        ears: elEars ? parseFloat(elEars.value) : 1.0,
+        legs: elLegs ? parseFloat(elLegs.value) : 1.0
     };
     window.updateDogShape(shapeParams);
     
