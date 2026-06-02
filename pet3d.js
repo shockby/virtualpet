@@ -504,35 +504,35 @@ window.setPetType = function (type) {
     headGroup.add(eyeGroupBase);
 
     if (type === 'parrot') {
-        // Cockatoo expressive dark eyes with white highlights
-        const eyeLWhite = createSphere(0.34, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 }));
-        eyeLWhite.position.set(0.48, 0.32, 0.66);
+        // Cockatoo expressive dark eyes with white highlights (outward/forward placement)
+        const eyeLWhite = createSphere(0.32, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 }));
+        eyeLWhite.position.set(0.62, 0.25, 0.58);
         eyeGroupBase.add(eyeLWhite);
-        const pupilL = createSphere(0.16, matDark);
-        pupilL.position.set(0.06, 0.04, 0.24);
+        const pupilL = createSphere(0.15, matDark);
+        pupilL.position.set(0.05, 0.02, 0.22);
         eyeLWhite.add(pupilL);
-        const hilightL = createSphere(0.06, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1 }));
-        hilightL.position.set(0.11, 0.11, 0.31);
+        const hilightL = createSphere(0.05, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1 }));
+        hilightL.position.set(0.09, 0.09, 0.28);
         eyeLWhite.add(hilightL);
         eyeL = eyeLWhite;
 
-        const eyeRWhite = createSphere(0.34, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 }));
-        eyeRWhite.position.set(-0.48, 0.32, 0.66);
+        const eyeRWhite = createSphere(0.32, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 }));
+        eyeRWhite.position.set(-0.62, 0.25, 0.58);
         eyeGroupBase.add(eyeRWhite);
-        const pupilR = createSphere(0.16, matDark);
-        pupilR.position.set(-0.06, 0.04, 0.24);
+        const pupilR = createSphere(0.15, matDark);
+        pupilR.position.set(-0.05, 0.02, 0.22);
         eyeRWhite.add(pupilR);
-        const hilightR = createSphere(0.06, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1 }));
-        hilightR.position.set(-0.11, 0.11, 0.31);
+        const hilightR = createSphere(0.05, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1 }));
+        hilightR.position.set(-0.09, 0.09, 0.28);
         eyeRWhite.add(hilightR);
         eyeR = eyeRWhite;
     } else if (type === 'cat') {
-        // Siamese cat glowing sapphire-blue eyes with vertical pupils
+        // Siamese cat glowing sapphire-blue eyes (moved forward to clear the dark seal mask)
         const matSiameseEye = new THREE.MeshStandardMaterial({ color: 0x00a8e8, roughness: 0.15, metalness: 0.1 });
         
         const catEyeL = createSphere(0.21, matSiameseEye);
         catEyeL.scale.set(1.2, 0.95, 0.95);
-        catEyeL.position.set(0.44, 0.32, 0.82);
+        catEyeL.position.set(0.44, 0.28, 1.15); // Z pushed forward from 0.82 to 1.15 to sit on mask surface
         catEyeL.rotation.z = -0.12;
         eyeGroupBase.add(catEyeL);
         eyeL = createSphere(0.08, matDark);
@@ -543,7 +543,7 @@ window.setPetType = function (type) {
 
         const catEyeR = createSphere(0.21, matSiameseEye);
         catEyeR.scale.set(1.2, 0.95, 0.95);
-        catEyeR.position.set(-0.44, 0.32, 0.82);
+        catEyeR.position.set(-0.44, 0.28, 1.15);
         catEyeR.rotation.z = 0.12;
         eyeGroupBase.add(catEyeR);
         eyeR = createSphere(0.08, matDark);
@@ -551,8 +551,35 @@ window.setPetType = function (type) {
         eyeR.position.set(0, 0, 0.18);
         catEyeR.add(eyeR);
         eyeR = catEyeR;
+    } else if (type === 'shiba') {
+        // Shiba eyes: moved forward to surface of the large head sphere
+        eyeL = createSphere(0.18, matDark);
+        eyeL.position.set(0.52, 0.35, 1.35); // Z pushed from 0.95 to 1.35
+        eyeGroupBase.add(eyeL);
+
+        eyeR = createSphere(0.18, matDark);
+        eyeR.position.set(-0.52, 0.35, 1.35);
+        eyeGroupBase.add(eyeR);
+    } else if (type === 'bulldog') {
+        // Bulldog eyes: wider and forward to match large face wrinkles
+        eyeL = createSphere(0.18, matDark);
+        eyeL.position.set(0.65, 0.28, 1.35); // Z pushed from 0.95 to 1.35
+        eyeGroupBase.add(eyeL);
+
+        eyeR = createSphere(0.18, matDark);
+        eyeR.position.set(-0.65, 0.28, 1.35);
+        eyeGroupBase.add(eyeR);
+    } else if (type === 'poodle') {
+        // Poodle eyes: fits the smaller core head
+        eyeL = createSphere(0.16, matDark);
+        eyeL.position.set(0.42, 0.28, 0.95);
+        eyeGroupBase.add(eyeL);
+
+        eyeR = createSphere(0.16, matDark);
+        eyeR.position.set(-0.42, 0.28, 0.95);
+        eyeGroupBase.add(eyeR);
     } else {
-        // Standard Dark Eyes
+        // Fallback standard
         eyeL = createSphere(0.18, matDark);
         eyeL.position.set(0.52, 0.4, 0.95);
         eyeGroupBase.add(eyeL);
