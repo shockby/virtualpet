@@ -867,11 +867,11 @@ async function getGeminiResponse(userPrompt, isThought = false) {
                     body: JSON.stringify(requestBody)
                 });
 
-                if (response.status === 429 || response.status === 404) {
-                    // 429: quota exceeded, 404: model not available → try next
+                if (response.status === 429 || response.status === 404 || response.status >= 500) {
+                    // 429: quota exceeded, 404: model not available, 5xx: service error/high demand → try next
                     console.warn(`[Gemini] ${model} returned ${response.status}, switching model...`);
                     currentModelIndex = (currentModelIndex + 1) % GEMINI_MODELS.length;
-                    const backoffMs = response.status === 429
+                    const backoffMs = (response.status === 429 || response.status >= 500)
                         ? Math.min(2000 * Math.pow(2, attempt), 30000)
                         : 500;
                     console.log(`[Gemini] Retrying with ${GEMINI_MODELS[currentModelIndex]} in ${backoffMs}ms...`);
@@ -890,18 +890,14 @@ async function getGeminiResponse(userPrompt, isThought = false) {
                 return JSON.parse(responseText);
 
             } catch (error) {
-                if (error.message && error.message.includes('429')) {
-                    currentModelIndex = (currentModelIndex + 1) % GEMINI_MODELS.length;
-                    await sleep(2000 * Math.pow(2, attempt));
-                    attempt++;
-                    continue;
-                }
-                console.error("Gemini API request failed:", error);
-                if (isThought) return null;
-                return {
-                    reply: `クーン…頭がぼーっとするワン。ちょっと待ってほしいワン…🐶`,
-                    animation: "idle"
-                };
+                // If it's a transient rate limit error caught in the throw, or a fetch/network failure
+                console.error(`[Gemini] Request failed for ${model}:`, error);
+                currentModelIndex = (currentModelIndex + 1) % GEMINI_MODELS.length;
+                const backoffMs = Math.min(2000 * Math.pow(2, attempt), 30000);
+                console.log(`[Gemini] Retrying with ${GEMINI_MODELS[currentModelIndex]} in ${backoffMs}ms...`);
+                await sleep(backoffMs);
+                attempt++;
+                continue;
             }
         }
 
