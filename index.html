@@ -145,9 +145,9 @@
             </div>
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding-right: 5px;">
                 <!-- Pet Name Setting -->
-                <div class="customizer-panel" style="border-top: none; padding-top: 0; margin-bottom: 15px;">
+                <div class="customizer-panel">
                     <div class="slider-group">
-                        <label style="margin-bottom: 8px; font-weight: 600; color: var(--text-muted);">Pet Name (名前):</label>
+                        <label style="margin-bottom: 4px;">Pet Name (名前):</label>
                         <div style="display: flex; gap: 8px;">
                             <input type="text" id="input-pet-name" placeholder="ペットの名前を入力..." style="padding: 10px; border-radius: 8px; border: 1px solid var(--panel-border); background: white; font-family: inherit; font-size: 1rem; color: var(--text-main); outline: none; flex-grow: 1; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
                             <button id="btn-save-name" style="padding: 10px 16px; border-radius: 8px; border: none; background: #3b82f6; color: white; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: background 0.2s; box-shadow: 0 2px 4px rgba(59,130,246,0.2);">Save</button>
@@ -155,12 +155,12 @@
                     </div>
                 </div>
 
-                <hr style="border: none; border-top: 1px solid var(--panel-border); margin: 15px 0;">
+                <hr>
 
                 <!-- Pet Type -->
-                <div class="customizer-panel" style="border-top: none; padding-top: 0; margin-bottom: 5px;">
+                <div class="customizer-panel">
                     <div class="slider-group">
-                        <label style="margin-bottom: 8px; font-weight: 600; color: var(--text-muted);">Pet Type (ペットの種類):</label>
+                        <label style="margin-bottom: 4px;">Pet Type (ペットの種類):</label>
                         <select id="select-pet-type" style="padding: 10px; border-radius: 8px; border: 1px solid var(--panel-border); background: white; font-family: inherit; font-size: 1rem; color: var(--text-main); outline: none; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                             <option value="shiba">柴犬 (Shiba Inu)</option>
                             <option value="poodle">トイプードル (Toy Poodle)</option>
@@ -171,12 +171,12 @@
                     </div>
                 </div>
 
-                <hr style="border: none; border-top: 1px solid var(--panel-border); margin: 15px 0;">
+                <hr>
 
                 <!-- Pet Personality -->
-                <div class="customizer-panel" style="border-top: none; padding-top: 0; margin-bottom: 5px;">
+                <div class="customizer-panel">
                     <div class="slider-group">
-                        <label style="margin-bottom: 8px; font-weight: 600; color: var(--text-muted);">Personality:</label>
+                        <label style="margin-bottom: 4px;">Personality:</label>
                         <select id="select-personality" style="padding: 10px; border-radius: 8px; border: 1px solid var(--panel-border); background: white; font-family: inherit; font-size: 1rem; color: var(--text-main); outline: none; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                             <option value="normal">Normal (普通)</option>
                             <option value="energetic">Energetic (元気)</option>
@@ -184,33 +184,33 @@
                             <option value="glutton">Glutton (くいしんぼう)</option>
                         </select>
                     </div>
-                    <p class="personality-desc" style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; font-weight: 500; margin-top: 8px;">
+                    <p class="personality-desc">
                         ※ 性格を変更すると、お腹や体力の減るスピード、お世話の効果、AIの口調や音声の高さが変化するワン！🐾
                     </p>
                 </div>
                 
-                <hr style="border: none; border-top: 1px solid var(--panel-border); margin: 15px 0;">
+                <hr>
 
                 <!-- Shape Customization -->
-                <div class="customizer-panel" style="border-top: none; padding-top: 0;">
-                    <h4 style="margin-bottom: 12px; font-size: 0.95rem; color: var(--text-muted); font-weight: 600;">Customize Pet Shape</h4>
+                <div class="customizer-panel">
+                    <h4>Customize Pet Shape</h4>
 
-                    <div class="slider-group" style="margin-bottom: 12px;">
+                    <div class="slider-group">
                         <label>Body Length: <span id="val-body">1.0</span></label>
                         <input type="range" id="slider-body" min="0.5" max="1.5" step="0.1" value="1.0">
                     </div>
 
-                    <div class="slider-group" style="margin-bottom: 12px;">
+                    <div class="slider-group">
                         <label>Head Size: <span id="val-head">1.0</span></label>
                         <input type="range" id="slider-head" min="0.7" max="1.3" step="0.1" value="1.0">
                     </div>
 
-                    <div class="slider-group" style="margin-bottom: 12px;">
+                    <div class="slider-group">
                         <label>Ear Length: <span id="val-ears">1.0</span></label>
                         <input type="range" id="slider-ears" min="0.5" max="2.0" step="0.1" value="1.0">
                     </div>
 
-                    <div class="slider-group" style="margin-bottom: 12px;">
+                    <div class="slider-group">
                         <label>Leg Length: <span id="val-legs">1.0</span></label>
                         <input type="range" id="slider-legs" min="0.5" max="1.8" step="0.1" value="1.0">
                     </div>

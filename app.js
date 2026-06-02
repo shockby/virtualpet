@@ -117,6 +117,9 @@ function init() {
         window.setPetType(state.petType);
     }
 
+    // Set initial quick prompts
+    updateQuickPrompts();
+
     // Start game loop: ticks every 3 seconds
     setInterval(gameTick, 3000);
     // Spontaneous thought checker: runs every 60 seconds
@@ -150,6 +153,7 @@ function init() {
             if (window.setPetType) {
                 window.setPetType(state.petType);
             }
+            updateQuickPrompts();
             
             // Re-trigger greeting on change
             let changeReply = "";
@@ -297,17 +301,20 @@ function init() {
         resetInactivityTimer();
     });
 
-    // Quick chips listeners
-    quickPromptChips.forEach(chip => {
-        chip.addEventListener('click', () => {
+    // Quick chips event delegation (dynamically handles updated chips)
+    const quickPromptsContainer = document.querySelector('.quick-prompts');
+    if (quickPromptsContainer) {
+        quickPromptsContainer.addEventListener('click', (e) => {
+            const chip = e.target.closest('.prompt-chip');
+            if (!chip) return;
             const promptText = chip.getAttribute('data-prompt');
-            if (promptText === '骨を投げて！') {
+            if (promptText === '骨を投げて！' || promptText === 'おもちゃを投げて！' || promptText === '飛んでみて！') {
                 throwBoneAction();
             } else {
                 submitMessage(promptText);
             }
         });
-    });
+    }
 
     // Voice Recognition (Speech-to-Text) Initialization
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -850,8 +857,8 @@ const LOCAL_CHAT_RESPONSES = {
         }
     },
     cat: {
-        paw: 'にゃー、お手だにゃ！ほら、できたにゃん🐾',
-        sit: 'お座りにゃ。気が向いたから待ってあげるにゃん🐾',
+        paw: 'にゃー、ハイタッチだにゃ！ほら、タッチ🐾',
+        sit: 'お座りにゃ。気が向いたからここで待つにゃん🐾',
         sleep: 'ふにゃあ…おやすみにゃ。毛布をかけてにゃん…💤',
         love: 'ゴロゴロ…なでなで気持ちいいにゃ〜。もっと撫でるにゃ！💖',
         name: `私の名前は「\${petName}」にゃ！お上品で素敵にゃん！🐱`,
@@ -859,7 +866,7 @@ const LOCAL_CHAT_RESPONSES = {
             normal: [
                 'ニャーオ。今日も気まぐれに付き合ってあげるにゃ。',
                 'ゴロゴロ…喉を鳴らして甘えてみるにゃん。',
-                'ジー…何してるにゃ？気になるにゃ。',
+                'ジー…何してるにゃ？気になるにゃ. ',
                 'お腹すいたにゃ。高級なキャットフードがいいにゃ！'
             ],
             energetic: [
@@ -883,8 +890,8 @@ const LOCAL_CHAT_RESPONSES = {
         }
     },
     parrot: {
-        paw: 'パタパタ！お手！できたよ！褒めて！🦜',
-        sit: 'お座り！待て！じっとしてるよ！🦴',
+        paw: 'パタパタ！ハロー！ご挨拶だよ！🦜',
+        sit: 'お座り！じっとしてお話を聞くよ！✨',
         sleep: 'ウトウト…おやすみオウム…静かにしてね…💤',
         love: 'ハロー！なでなで大好き！もっとパタパタ！💖',
         name: `ボクの名前は「\${petName}」！オウム！素敵な名前だね！🦜`,
@@ -930,14 +937,14 @@ function submitLocalMessage(text) {
         const cleanText = text.toLowerCase();
         const typePool = LOCAL_CHAT_RESPONSES[state.petType] || LOCAL_CHAT_RESPONSES.shiba;
         
-        // Keyword checks
-        if (cleanText.includes('お手') || cleanText.includes('おて')) {
+        // Keyword checks (handles dog, cat, and bird variants)
+        if (cleanText.includes('お手') || cleanText.includes('おて') || cleanText.includes('ハイタッチ') || cleanText.includes('挨拶') || cleanText.includes('あいさつ')) {
             animation = 'paw';
             reply = typePool.paw;
-        } else if (cleanText.includes('お座り') || cleanText.includes('おすわり') || cleanText.includes('待て') || cleanText.includes('まて')) {
+        } else if (cleanText.includes('お座り') || cleanText.includes('おすわり') || cleanText.includes('待て') || cleanText.includes('まて') || cleanText.includes('おいで') || cleanText.includes('おしゃべり')) {
             animation = 'sit';
             reply = typePool.sit;
-        } else if (cleanText.includes('骨') || cleanText.includes('投げ') || cleanText.includes('ボール') || cleanText.includes('もってきて')) {
+        } else if (cleanText.includes('骨') || cleanText.includes('投げ') || cleanText.includes('ボール') || cleanText.includes('もってきて') || cleanText.includes('おもちゃ') || cleanText.includes('飛んで')) {
             throwBoneAction();
             return;
         } else if (cleanText.includes('寝る') || cleanText.includes('おやすみ') || cleanText.includes('眠')) {
@@ -1080,7 +1087,9 @@ ${speechStyle}
 性格: ${state.personality} (normal=普通, energetic=ハイテンション!, lazy=のんびり…, glutton=食いしん坊)
 
 アニメーション選択 (1つ): idle/happy/sleep/paw/sit/fetch
-「骨投げ」「持ってきて」→fetch, 「お手」→paw, 「お座り」「待て」→sit
+「骨投げ」「持ってきて」「おもちゃを投げて」「飛んでみて」→fetch
+「お手」「ハイタッチ」「挨拶」→paw
+「お座り」「待て」「こっちおいで」「おしゃべりして」→sit
 
 体型変更(省略可): body(0.5-1.5), head(0.7-1.3), ears(0.5-2.0), legs(0.5-1.8)
 ステータス変更(省略可): hunger/happiness/energy の増減値
@@ -1237,6 +1246,46 @@ function speakText(text) {
     utterance.rate = rate;
     
     window.speechSynthesis.speak(utterance);
+}
+
+// Update suggestion chips dynamically based on pet type (dog, cat, parrot)
+function updateQuickPrompts() {
+    const container = document.querySelector('.quick-prompts');
+    if (!container) return;
+    
+    // Clear existing
+    container.innerHTML = '';
+    
+    let prompts = [];
+    if (state.petType === 'cat') {
+        prompts = [
+            { text: '🐾 ハイタッチ！', prompt: 'ハイタッチ！' },
+            { text: '🐱 お座りして！', prompt: 'お座りして！' },
+            { text: '🐭 おもちゃ投げて！', prompt: 'おもちゃを投げて！' }
+        ];
+    } else if (state.petType === 'parrot') {
+        prompts = [
+            { text: '👋 挨拶して！', prompt: '挨拶して！' },
+            { text: '💬 おしゃべりして！', prompt: 'おしゃべりして！' },
+            { text: '🦜 飛んでみて！', prompt: '飛んでみて！' }
+        ];
+    } else {
+        // Dogs (Shiba, Poodle, Bulldog)
+        prompts = [
+            { text: '👋 お手！', prompt: 'お手！' },
+            { text: '✨ 待て！', prompt: '待て！' },
+            { text: '🦴 骨を投げて！', prompt: '骨を投げて！' }
+        ];
+    }
+    
+    prompts.forEach(p => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'prompt-chip';
+        btn.setAttribute('data-prompt', p.prompt);
+        btn.textContent = p.text;
+        container.appendChild(btn);
+    });
 }
 
 // Start app

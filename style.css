@@ -863,3 +863,39 @@ header h1 {
 .modal-body::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.25);
 }
+
+/* General Dividers */
+hr {
+    border: none;
+    border-top: 1px solid var(--panel-border);
+    margin: 8px 0;
+}
+
+/* Personality Description */
+.personality-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+/* Customize Dialog Spacing Adjustments */
+#modal-personality .modal-body {
+    gap: 8px;
+}
+
+#modal-personality .customizer-panel {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    gap: 8px;
+}
+
+#modal-personality hr {
+    margin: 4px 0;
+}
+
+#modal-personality .slider-group {
+    margin-bottom: 0;
+}
