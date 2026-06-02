@@ -68,6 +68,7 @@ function clearGroup(group) {
 }
 
 // Species Anatomical Configurations (Positions, Rotations, Scales)
+// These define the physical proportions (poodle's tall square stance, bulldog's wide pear shape)
 const PET_BASE_CONFIGS = {
     shiba: {
         legFL: { x: 0.8, y: 0.5, z: 1.0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
@@ -82,52 +83,52 @@ const PET_BASE_CONFIGS = {
         bodyPos: { x: 0, y: 1.3, z: 0 }
     },
     poodle: {
-        legFL: { x: 0.8, y: 0.5, z: 1.0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
-        legFR: { x: -0.8, y: 0.5, z: 1.0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
-        legBL: { x: 0.8, y: 0.5, z: -0.8, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
-        legBR: { x: -0.8, y: 0.5, z: -0.8, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
-        headGroup: { x: 0, y: 2.8, z: 1.2, rx: 0, ry: 0, rz: 0 },
-        tailGroup: { x: 0, y: 1.8, z: -1.8, rx: 0, ry: 0, rz: 0 },
-        bodyScale: { x: 0.9, y: 0.85, z: 1.2 },
-        bellyScale: { x: 0.8, y: 0.8, z: 1.15 },
+        legFL: { x: 0.7, y: 0.6, z: 0.8, rx: 0, ry: 0, rz: 0, sx: 0.8, sy: 1.35, sz: 0.8 },
+        legFR: { x: -0.7, y: 0.6, z: 0.8, rx: 0, ry: 0, rz: 0, sx: 0.8, sy: 1.35, sz: 0.8 },
+        legBL: { x: 0.7, y: 0.6, z: -0.7, rx: 0, ry: 0, rz: 0, sx: 0.8, sy: 1.35, sz: 0.8 },
+        legBR: { x: -0.7, y: 0.6, z: -0.7, rx: 0, ry: 0, rz: 0, sx: 0.8, sy: 1.35, sz: 0.8 },
+        headGroup: { x: 0, y: 3.1, z: 0.9, rx: 0, ry: 0, rz: 0 },
+        tailGroup: { x: 0, y: 1.8, z: -1.4, rx: 0, ry: 0, rz: 0 },
+        bodyScale: { x: 0.8, y: 0.75, z: 1.05 },
+        bellyScale: { x: 0.7, y: 0.7, z: 0.95 },
         bellyPos: { x: 0, y: 1.1, z: 0.2 },
-        bodyPos: { x: 0, y: 1.3, z: 0 }
+        bodyPos: { x: 0, y: 1.45, z: 0 }
     },
     bulldog: {
-        legFL: { x: 1.1, y: 0.5, z: 0.9, rx: 0, ry: 0, rz: 0.15, sx: 1.2, sy: 0.75, sz: 1.2 },
-        legFR: { x: -1.1, y: 0.5, z: 0.9, rx: 0, ry: 0, rz: -0.15, sx: 1.2, sy: 0.75, sz: 1.2 },
-        legBL: { x: 1.0, y: 0.5, z: -0.7, rx: 0, ry: 0, rz: 0, sx: 1.1, sy: 0.75, sz: 1.1 },
-        legBR: { x: -1.0, y: 0.5, z: -0.7, rx: 0, ry: 0, rz: 0, sx: 1.1, sy: 0.75, sz: 1.1 },
-        headGroup: { x: 0, y: 2.3, z: 1.1, rx: 0, ry: 0, rz: 0 },
-        tailGroup: { x: 0, y: 1.5, z: -1.2, rx: 0, ry: 0, rz: 0 },
-        bodyScale: { x: 1.2, y: 0.95, z: 1.1 },
-        bellyScale: { x: 1.0, y: 0.85, z: 1.05 },
-        bellyPos: { x: 0, y: 1.0, z: 0.2 },
-        bodyPos: { x: 0, y: 1.2, z: 0 }
+        legFL: { x: 1.15, y: 0.45, z: 0.8, rx: 0, ry: 0, rz: 0.22, sx: 1.3, sy: 0.7, sz: 1.3 },
+        legFR: { x: -1.15, y: 0.45, z: 0.8, rx: 0, ry: 0, rz: -0.22, sx: 1.3, sy: 0.7, sz: 1.3 },
+        legBL: { x: 0.9, y: 0.45, z: -0.8, rx: 0, ry: 0, rz: 0, sx: 1.1, sy: 0.7, sz: 1.1 },
+        legBR: { x: -0.9, y: 0.45, z: -0.8, rx: 0, ry: 0, rz: 0, sx: 1.1, sy: 0.7, sz: 1.1 },
+        headGroup: { x: 0, y: 2.1, z: 1.1, rx: 0, ry: 0, rz: 0 },
+        tailGroup: { x: 0, y: 1.3, z: -1.2, rx: 0, ry: 0, rz: 0 },
+        bodyScale: { x: 1.35, y: 0.9, z: 1.15 },
+        bellyScale: { x: 1.1, y: 0.8, z: 1.1 },
+        bellyPos: { x: 0, y: 0.95, z: 0.2 },
+        bodyPos: { x: 0, y: 1.15, z: 0 }
     },
     cat: {
-        legFL: { x: 0.7, y: 0.5, z: 0.9, rx: 0, ry: 0, rz: 0, sx: 0.8, sy: 1.0, sz: 0.8 },
-        legFR: { x: -0.7, y: 0.5, z: 0.9, rx: 0, ry: 0, rz: 0, sx: 0.8, sy: 1.0, sz: 0.8 },
-        legBL: { x: 0.7, y: 0.5, z: -0.7, rx: 0, ry: 0, rz: 0, sx: 0.8, sy: 1.0, sz: 0.8 },
-        legBR: { x: -0.7, y: 0.5, z: -0.7, rx: 0, ry: 0, rz: 0, sx: 0.8, sy: 1.0, sz: 0.8 },
-        headGroup: { x: 0, y: 2.8, z: 1.2, rx: 0, ry: 0, rz: 0 },
+        legFL: { x: 0.65, y: 0.55, z: 0.9, rx: 0, ry: 0, rz: 0, sx: 0.75, sy: 1.25, sz: 0.75 },
+        legFR: { x: -0.65, y: 0.55, z: 0.9, rx: 0, ry: 0, rz: 0, sx: 0.75, sy: 1.25, sz: 0.75 },
+        legBL: { x: 0.65, y: 0.55, z: -0.7, rx: 0, ry: 0, rz: 0, sx: 0.75, sy: 1.25, sz: 0.75 },
+        legBR: { x: -0.65, y: 0.55, z: -0.7, rx: 0, ry: 0, rz: 0, sx: 0.75, sy: 1.25, sz: 0.75 },
+        headGroup: { x: 0, y: 2.9, z: 1.0, rx: 0, ry: 0, rz: 0 },
         tailGroup: { x: 0, y: 1.6, z: -1.3, rx: 0, ry: 0, rz: 0 },
-        bodyScale: { x: 0.75, y: 0.75, z: 1.25 },
-        bellyScale: { x: 0.65, y: 0.65, z: 1.2 },
+        bodyScale: { x: 0.7, y: 0.7, z: 1.25 },
+        bellyScale: { x: 0.6, y: 0.6, z: 1.2 },
         bellyPos: { x: 0, y: 1.1, z: 0.2 },
-        bodyPos: { x: 0, y: 1.3, z: 0 }
+        bodyPos: { x: 0, y: 1.35, z: 0 }
     },
     parrot: {
         legFL: { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, sx: 0.001, sy: 0.001, sz: 0.001 },
         legFR: { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, sx: 0.001, sy: 0.001, sz: 0.001 },
         legBL: { x: 0.35, y: 0.45, z: 0.0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
         legBR: { x: -0.35, y: 0.45, z: 0.0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
-        headGroup: { x: 0, y: 2.7, z: 0.4, rx: 0, ry: 0, rz: 0 },
-        tailGroup: { x: 0, y: 1.0, z: -0.8, rx: 0, ry: 0, rz: 0 },
-        bodyScale: { x: 0.85, y: 1.15, z: 0.85 },
-        bellyScale: { x: 0.75, y: 0.9, z: 0.8 },
-        bellyPos: { x: 0, y: 1.3, z: 0.25 },
-        bodyPos: { x: 0, y: 1.4, z: 0 }
+        headGroup: { x: 0, y: 2.7, z: 0.3, rx: 0, ry: 0, rz: 0 },
+        tailGroup: { x: 0, y: 1.0, z: -0.7, rx: 0, ry: 0, rz: 0 },
+        bodyScale: { x: 0.8, y: 1.2, z: 0.8 },
+        bellyScale: { x: 0.7, y: 0.9, z: 0.75 },
+        bellyPos: { x: 0, y: 1.35, z: 0.2 },
+        bodyPos: { x: 0, y: 1.45, z: 0 }
     }
 };
 
@@ -144,45 +145,45 @@ window.setPetType = function (type) {
     wingLGroup = null;
     wingRGroup = null;
 
-    // Define colors and materials based on pet type
+    // Define custom, organic color palettes for authentic representations
     let colorMain, colorAccent, colorEars, colorDark, colorPink;
     
     if (type === 'shiba') {
-        colorMain = 0xd97706;   // Warm Shiba Tan
-        colorAccent = 0xfffbeb; // Soft Cream
-        colorEars = 0xb45309;   // Dark Tan (Ear backs)
-        colorDark = 0x1f2937;   // Dark Charcoal Eyes/Nose
-        colorPink = 0xfca5a5;   // Pink Tongue
+        colorMain = 0xc27a3f;   // Authentic Red Shiba Tan/Orange
+        colorAccent = 0xfafafa; // Pure Soft White (Cheeks, Belly, Urajiro)
+        colorEars = 0x9b5b29;   // Dark Brown Ear Shadows
+        colorDark = 0x1f2937;   // Warm Charcoal Eyes/Nose
+        colorPink = 0xfca5a5;   // Soft Pink
     } else if (type === 'poodle') {
-        colorMain = 0xd97706;   // Rich Apricot/Bronze
-        colorAccent = 0xfef3c7; // Warm Soft Apricot
-        colorEars = 0xb45309;   // Poodle Ear Accent
-        colorDark = 0x1f2937;   // Dark Charcoal
+        colorMain = 0xa26c48;   // Teddy Bear Apricot Brown
+        colorAccent = 0xd59e74; // Lighter Apricot Accent
+        colorEars = 0xa26c48;   // Matching Apricot Ears
+        colorDark = 0x111827;   // Dark Charcoal Eyes
         colorPink = 0xfca5a5;   // Pink
     } else if (type === 'bulldog') {
-        colorMain = 0x9ca3af;   // Slate Grey
-        colorAccent = 0xf3f4f6; // Soft Off-White
-        colorEars = 0x4b5563;   // Dark Slate
-        colorDark = 0x111827;   // Dark Grey
+        colorMain = 0xf3f4f6;   // Base White for Pied Pattern
+        colorAccent = 0x3f2c22; // Dark Brown Patches
+        colorEars = 0x3f2c22;   // Dark Brown Ears
+        colorDark = 0x111827;   // Charcoal Black
         colorPink = 0xfca5a5;   // Pink
     } else if (type === 'cat') {
-        colorMain = 0xf97316;   // Bright Ginger
-        colorAccent = 0xffffff; // White Belly/Whiskers
-        colorEars = 0xea580c;   // Dark Ginger
-        colorDark = 0x111827;   // Dark Charcoal
-        colorPink = 0xfca5a5;   // Light Pink Nose
+        colorMain = 0xf4efe8;   // Ivory White for Siamese Base
+        colorAccent = 0x36251b; // Seal Brown Point Coloring (Face, Ears, Tails, Socks)
+        colorEars = 0x36251b;   // Point Ears
+        colorDark = 0x111827;   // Eye Pupils
+        colorPink = 0xfca5a5;   // Pink Nose
     } else if (type === 'parrot') {
-        colorMain = 0xef4444;   // Bright Scarlet
-        colorAccent = 0xeab308; // Bright Yellow (Chest/Beak Accent)
-        colorEars = 0x2563eb;   // Blue Wings
-        colorDark = 0x1f2937;   // Dark Grey Beak
+        colorMain = 0xfcfcfc;   // Pure White for Cockatoo
+        colorAccent = 0xfacc15; // Sulphur Yellow for Crest/Wing Accents
+        colorEars = 0xfef08a;   // Lighter Yellow Under-wing
+        colorDark = 0x3e3e40;   // Slate Grey Beak and Talons
         colorPink = 0xfca5a5;   // Pink
     }
 
     const matMain = new THREE.MeshStandardMaterial({ color: colorMain, roughness: 0.85, metalness: 0.05 });
     const matAccent = new THREE.MeshStandardMaterial({ color: colorAccent, roughness: 0.85, metalness: 0.05 });
     const matEars = new THREE.MeshStandardMaterial({ color: colorEars, roughness: 0.85, metalness: 0.05 });
-    const matDark = new THREE.MeshStandardMaterial({ color: colorDark, roughness: 0.3, metalness: 0.1 });
+    const matDark = new THREE.MeshStandardMaterial({ color: colorDark, roughness: 0.25, metalness: 0.1 });
     const matPink = new THREE.MeshStandardMaterial({ color: colorPink, roughness: 0.6, metalness: 0.05 });
 
     const cfg = PET_BASE_CONFIGS[type] || PET_BASE_CONFIGS.shiba;
@@ -212,15 +213,15 @@ window.setPetType = function (type) {
         body.scale.set(cfg.bodyScale.x, cfg.bodyScale.y, cfg.bodyScale.z);
     }
 
-    // Body additions
+    // Body additions & markings
     if (type === 'shiba') {
-        // White chest fur patch (Urajiro)
+        // Pure white chest fur patch (Urajiro)
         const chestFur = createSphere(0.75, matAccent);
-        chestFur.scale.set(1.0, 0.8, 0.5);
-        chestFur.position.set(0, 0.35, 0.85);
+        chestFur.scale.set(1.0, 0.85, 0.5);
+        chestFur.position.set(0, 0.3, 0.85);
         body.add(chestFur);
     } else if (type === 'bulldog') {
-        // Bulldog neck fold / collar wrinkles
+        // Bulldog neck skin wrinkles
         const neckFold1 = createSphere(1.2, matMain);
         neckFold1.scale.set(1.15, 0.35, 1.05);
         neckFold1.position.set(0, 0.5, 0.4);
@@ -230,8 +231,19 @@ window.setPetType = function (type) {
         neckFold2.scale.set(1.1, 0.3, 1.0);
         neckFold2.position.set(0, 0.25, 0.55);
         body.add(neckFold2);
+
+        // Pied dark brown spots/patches on bulldog body
+        const patchBack = createSphere(0.7, matAccent); // Brown patch
+        patchBack.scale.set(1.1, 0.6, 1.0);
+        patchBack.position.set(0.3, 0.5, -0.4);
+        body.add(patchBack);
+
+        const patchSide = createSphere(0.5, matAccent);
+        patchSide.scale.set(0.4, 0.8, 0.8);
+        patchSide.position.set(-0.9, 0.1, 0.1);
+        body.add(patchSide);
     } else if (type === 'cat') {
-        // Cat Collar & Bell
+        // Siamese collar
         const collarGeo = new THREE.TorusGeometry(0.8, 0.08, 8, 24);
         const collarMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.6 });
         const collar = new THREE.Mesh(collarGeo, collarMat);
@@ -244,24 +256,8 @@ window.setPetType = function (type) {
         const bell = new THREE.Mesh(bellGeo, bellMat);
         bell.position.set(0, -0.6, 0.6);
         collar.add(bell);
-
-        // Dark Stripes on ginger cat
-        const stripeMat = new THREE.MeshStandardMaterial({ color: 0xc2410c, roughness: 0.8 }); // Darker Orange
-        for (let i = 0; i < 3; i++) {
-            const sL = createSphere(0.08, stripeMat);
-            sL.scale.set(0.15, 0.7, 1.5);
-            sL.position.set(0.65, 0.1, -0.3 + i * 0.3);
-            sL.rotation.z = 0.25;
-            body.add(sL);
-            
-            const sR = createSphere(0.08, stripeMat);
-            sR.scale.set(0.15, 0.7, 1.5);
-            sR.position.set(-0.65, 0.1, -0.3 + i * 0.3);
-            sR.rotation.z = -0.25;
-            body.add(sR);
-        }
     } else if (type === 'poodle') {
-        // Toy Poodle extra fluffy details
+        // Extra fluff poms on shoulders and hips
         const chestFluff = createSphere(0.65, matMain);
         chestFluff.position.set(0, 0.5, 0.6);
         body.add(chestFluff);
@@ -279,7 +275,8 @@ window.setPetType = function (type) {
     belly = createSphere(1.4, matAccent);
     belly.position.set(cfg.bellyPos.x, cfg.bellyPos.y, cfg.bellyPos.z);
     belly.scale.set(cfg.bellyScale.x, cfg.bellyScale.y, cfg.bellyScale.z);
-    if (type !== 'poodle') {
+    if (type !== 'poodle' && type !== 'cat' && type !== 'parrot') {
+        // Siamese and Cockatoo use natural body colors for bellies
         dogGroup.add(belly);
     }
 
@@ -289,15 +286,15 @@ window.setPetType = function (type) {
     dogGroup.add(headGroup);
 
     if (type === 'poodle') {
-        // Fluffy poodle head core + extra cheek puffs
+        // Fluffy poodle head core + extra puffs for teddy bear look
         head = createSphere(0.9, matMain);
         head.scale.set(1.1, 0.95, 1.0);
         headGroup.add(head);
 
         const headPuffs = [
-            [0, 0.65, 0.15, 0.58],    // Topknot hair puff
-            [0.45, 0.15, 0.35, 0.45],  // L Cheek puff
-            [-0.45, 0.15, 0.35, 0.45], // R Cheek puff
+            [0, 0.65, 0.15, 0.58],    // Topknot puff
+            [0.45, 0.15, 0.35, 0.45],  // L Cheek fluff
+            [-0.45, 0.15, 0.35, 0.45], // R Cheek fluff
             [0, -0.35, 0.28, 0.45]     // Chin fluff
         ];
         headPuffs.forEach(([x, y, z, r]) => {
@@ -314,9 +311,9 @@ window.setPetType = function (type) {
         headGroup.add(head);
     }
 
-    // Head details (fluff, cheeks, crest, eyebrows)
+    // Head details (fluff, patches, crest, eyebrows)
     if (type === 'shiba') {
-        // Shiba signature cream cheek spots
+        // Pure white cheek highlights
         const cheekL = createSphere(0.45, matAccent);
         cheekL.scale.set(0.8, 0.6, 0.5);
         cheekL.position.set(0.7, -0.3, 0.8);
@@ -340,24 +337,12 @@ window.setPetType = function (type) {
         eyebrowR.rotation.z = 0.1;
         headGroup.add(eyebrowR);
     } else if (type === 'parrot') {
-        // White skin eye patches
-        const cheekL = createSphere(0.55, new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.9}));
-        cheekL.scale.set(0.1, 0.85, 0.85);
-        cheekL.position.set(0.82, 0.15, 0.25);
-        headGroup.add(cheekL);
-
-        const cheekR = createSphere(0.55, new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.9}));
-        cheekR.scale.set(0.1, 0.85, 0.85);
-        cheekR.position.set(-0.82, 0.15, 0.25);
-        headGroup.add(cheekR);
-
-        // Multi-layered colorful feather crest
-        const crestColors = [0xef4444, 0xeab308, 0x2563eb]; // Red, Yellow, Blue
+        // Cockatoo Sulphur crest feathers (flaring backwards gracefully)
         for (let i = 0; i < 3; i++) {
-            const crest = createSphere(0.24, new THREE.MeshStandardMaterial({ color: crestColors[i], roughness: 0.9 }));
-            crest.scale.set(0.25, 0.9, 0.45);
-            crest.position.set(0, 0.85 + i * 0.15, -0.2 - i * 0.1);
-            crest.rotation.x = -0.3 - i * 0.35;
+            const crest = createSphere(0.25, matAccent); // Bright yellow
+            crest.scale.set(0.24, 1.1, 0.48);
+            crest.position.set(0, 0.95 + i * 0.18, -0.15 - i * 0.12);
+            crest.rotation.x = -0.45 - i * 0.38;
             headGroup.add(crest);
         }
     } else if (type === 'bulldog') {
@@ -371,33 +356,36 @@ window.setPetType = function (type) {
         w2.scale.set(0.9, 0.18, 0.25);
         w2.position.set(0, 0.25, 0.95);
         headGroup.add(w2);
+
+        // Pied dark patch over the left eye/ear area
+        const eyePatch = createSphere(0.65, matAccent);
+        eyePatch.scale.set(0.9, 1.2, 0.5);
+        eyePatch.position.set(0.42, 0.22, 0.7);
+        eyePatch.rotation.z = -0.2;
+        headGroup.add(eyePatch);
     } else if (type === 'cat') {
-        // Cat head tabby stripes
-        const stripeMat = new THREE.MeshStandardMaterial({ color: 0xc2410c, roughness: 0.8 });
-        for (let i = -1; i <= 1; i++) {
-            const stripe = createSphere(0.06, stripeMat);
-            stripe.scale.set(0.25, 0.9, 2.5);
-            stripe.position.set(i * 0.28, 0.55, 0.4);
-            stripe.rotation.x = 0.45;
-            head.add(stripe);
-        }
+        // Siamese dark brown face mask (Seal point)
+        const faceMask = createSphere(0.72, matAccent);
+        faceMask.scale.set(1.2, 1.0, 0.4);
+        faceMask.position.set(0, -0.05, 0.8);
+        headGroup.add(faceMask);
     }
 
     // --- Snout & Mouth (or Beak for Parrot) ---
     if (type === 'parrot') {
-        // Hooked parrot beak (Upper hooks down over lower beak)
-        const beakUpperGeo = new THREE.SphereGeometry(0.46, 32, 32);
+        // Large curved Cockatoo beak (Dark grey/black)
+        const beakUpperGeo = new THREE.SphereGeometry(0.48, 32, 32);
         const beakUpper = new THREE.Mesh(beakUpperGeo, matDark);
-        beakUpper.scale.set(0.72, 1.25, 1.35);
-        beakUpper.position.set(0, -0.05, 0.88);
-        beakUpper.rotation.x = 0.4;
+        beakUpper.scale.set(0.72, 1.35, 1.35);
+        beakUpper.position.set(0, -0.08, 0.85);
+        beakUpper.rotation.x = 0.45;
         headGroup.add(beakUpper);
         beak = beakUpper;
 
         const beakLowerGeo = new THREE.SphereGeometry(0.3, 32, 32);
         const beakLower = new THREE.Mesh(beakLowerGeo, matDark);
         beakLower.scale.set(0.65, 0.5, 0.8);
-        beakLower.position.set(0, -0.45, 0.72);
+        beakLower.position.set(0, -0.48, 0.68);
         headGroup.add(beakLower);
 
         // Dummy snout for bone fetch
@@ -411,23 +399,23 @@ window.setPetType = function (type) {
     } else {
         if (type === 'bulldog') {
             // Bulldog flat face with jowls
-            snout = createSphere(0.7, matAccent);
+            snout = createSphere(0.7, matMain); // White base
             snout.scale.set(1.2, 0.55, 0.5);
             snout.position.set(0, -0.3, 0.95);
             headGroup.add(snout);
 
-            const jowlL = createSphere(0.38, matAccent);
+            const jowlL = createSphere(0.38, matMain);
             jowlL.scale.set(0.8, 1.25, 0.8);
             jowlL.position.set(0.42, -0.25, 0.1);
             snout.add(jowlL);
 
-            const jowlR = createSphere(0.38, matAccent);
+            const jowlR = createSphere(0.38, matMain);
             jowlR.scale.set(0.8, 1.25, 0.8);
             jowlR.position.set(-0.42, -0.25, 0.1);
             snout.add(jowlR);
 
             // Underbite chin + 2 tiny teeth
-            const chin = createSphere(0.42, matAccent);
+            const chin = createSphere(0.42, matMain);
             chin.scale.set(1.05, 0.5, 0.85);
             chin.position.set(0, -0.55, 0.85);
             headGroup.add(chin);
@@ -443,16 +431,16 @@ window.setPetType = function (type) {
             tR.position.set(-0.24, 0.18, 0.2);
             chin.add(tR);
         } else if (type === 'cat') {
-            // Cat ω whisker pads
+            // Cat ω whisker pads in seal point dark brown
             snout = new THREE.Group();
             headGroup.add(snout);
 
             const padL = createSphere(0.28, matAccent);
-            padL.position.set(0.22, -0.22, 0.88);
+            padL.position.set(0.2, -0.22, 0.86);
             headGroup.add(padL);
 
             const padR = createSphere(0.28, matAccent);
-            padR.position.set(-0.22, -0.22, 0.88);
+            padR.position.set(-0.2, -0.22, 0.86);
             headGroup.add(padR);
         } else if (type === 'poodle') {
             // Sleek poodle snout
@@ -482,7 +470,7 @@ window.setPetType = function (type) {
         nose = createSphere(0.2, type === 'cat' ? matPink : matDark);
         if (type === 'cat') {
             nose.scale.set(0.55, 0.38, 0.38);
-            nose.position.set(0, -0.08, 0.98);
+            nose.position.set(0, -0.08, 0.96);
             headGroup.add(nose); // mounted directly above pads
         } else if (type === 'bulldog') {
             nose.scale.set(1.3, 0.7, 0.7);
@@ -516,7 +504,7 @@ window.setPetType = function (type) {
     headGroup.add(eyeGroupBase);
 
     if (type === 'parrot') {
-        // Large cartoon bird eyes with pupils + bright reflection spheres
+        // Cockatoo expressive dark eyes with white highlights
         const eyeLWhite = createSphere(0.34, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 }));
         eyeLWhite.position.set(0.48, 0.32, 0.66);
         eyeGroupBase.add(eyeLWhite);
@@ -539,27 +527,27 @@ window.setPetType = function (type) {
         eyeRWhite.add(hilightR);
         eyeR = eyeRWhite;
     } else if (type === 'cat') {
-        // Cat eyes (Almond-shaped green iris with slit pupil)
-        const matCatEye = new THREE.MeshStandardMaterial({ color: 0xa3e635, roughness: 0.1, metalness: 0.1 });
+        // Siamese cat glowing sapphire-blue eyes with vertical pupils
+        const matSiameseEye = new THREE.MeshStandardMaterial({ color: 0x00a8e8, roughness: 0.15, metalness: 0.1 });
         
-        const catEyeL = createSphere(0.22, matCatEye);
+        const catEyeL = createSphere(0.21, matSiameseEye);
         catEyeL.scale.set(1.2, 0.95, 0.95);
-        catEyeL.position.set(0.46, 0.32, 0.82);
-        catEyeL.rotation.z = -0.15; // tilted cute look
+        catEyeL.position.set(0.44, 0.32, 0.82);
+        catEyeL.rotation.z = -0.12;
         eyeGroupBase.add(catEyeL);
         eyeL = createSphere(0.08, matDark);
-        eyeL.scale.set(0.35, 1.1, 0.35); // Slit pupil
+        eyeL.scale.set(0.35, 1.15, 0.35); // Cat slit
         eyeL.position.set(0, 0, 0.18);
         catEyeL.add(eyeL);
         eyeL = catEyeL;
 
-        const catEyeR = createSphere(0.22, matCatEye);
+        const catEyeR = createSphere(0.21, matSiameseEye);
         catEyeR.scale.set(1.2, 0.95, 0.95);
-        catEyeR.position.set(-0.46, 0.32, 0.82);
-        catEyeR.rotation.z = 0.15;
+        catEyeR.position.set(-0.44, 0.32, 0.82);
+        catEyeR.rotation.z = 0.12;
         eyeGroupBase.add(catEyeR);
         eyeR = createSphere(0.08, matDark);
-        eyeR.scale.set(0.35, 1.1, 0.35);
+        eyeR.scale.set(0.35, 1.15, 0.35);
         eyeR.position.set(0, 0, 0.18);
         catEyeR.add(eyeR);
         eyeR = catEyeR;
@@ -587,8 +575,8 @@ window.setPetType = function (type) {
 
     // Whiskers for Cats
     if (type === 'cat') {
-        const wGeo = new THREE.CylinderGeometry(0.015, 0.015, 0.9, 8);
-        const wMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.2 });
+        const wGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.95, 8);
+        const wMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
         for (let i = 0; i < 3; i++) {
             const wL = new THREE.Mesh(wGeo, wMat);
             wL.rotation.z = Math.PI / 2 + (i - 1) * 0.12;
@@ -613,11 +601,11 @@ window.setPetType = function (type) {
     headGroup.add(earRGroup);
 
     if (type === 'shiba') {
-        // Triangular Shiba ears with pink inner layer
+        // Triangular Shiba ears with pink inner layer, slightly forward tilted
         earLGroup.position.set(0.85, 0.85, 0.2);
         const earLMesh = new THREE.Mesh(new THREE.ConeGeometry(0.42, 0.9, 4), matMain);
         earLMesh.scale.set(0.7, 1.1, 0.4);
-        earLMesh.rotation.set(0.2, 0, -0.4);
+        earLMesh.rotation.set(0.25, -0.15, -0.4); // slightly tilted forward/outward
         earLGroup.add(earLMesh);
         
         const innerL = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.7, 4), matPink);
@@ -629,7 +617,7 @@ window.setPetType = function (type) {
         earRGroup.position.set(-0.85, 0.85, 0.2);
         const earRMesh = new THREE.Mesh(new THREE.ConeGeometry(0.42, 0.9, 4), matMain);
         earRMesh.scale.set(0.7, 1.1, 0.4);
-        earRMesh.rotation.set(0.2, 0, 0.4);
+        earRMesh.rotation.set(0.25, 0.15, 0.4);
         earRGroup.add(earRMesh);
 
         const innerR = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.7, 4), matPink);
@@ -638,11 +626,11 @@ window.setPetType = function (type) {
         earRMesh.add(innerR);
         earR = earRMesh;
     } else if (type === 'cat') {
-        // Pointy cat ears with pink insides
+        // Pointy Siamese ears in dark point brown (Seal point)
         earLGroup.position.set(0.85, 0.85, 0.1);
-        const earLMesh = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.85, 4), matMain);
+        const earLMesh = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.85, 4), matAccent);
         earLMesh.scale.set(0.7, 1.1, 0.45);
-        earLMesh.rotation.set(0.1, 0, -0.3);
+        earLMesh.rotation.set(0.1, 0.1, -0.32);
         earLGroup.add(earLMesh);
         
         const innerL = createSphere(0.2, matPink);
@@ -652,9 +640,9 @@ window.setPetType = function (type) {
         earL = earLMesh;
 
         earRGroup.position.set(-0.85, 0.85, 0.1);
-        const earRMesh = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.85, 4), matMain);
+        const earRMesh = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.85, 4), matAccent);
         earRMesh.scale.set(0.7, 1.1, 0.45);
-        earRMesh.rotation.set(0.1, 0, 0.3);
+        earRMesh.rotation.set(0.1, -0.1, 0.32);
         earRGroup.add(earRMesh);
 
         const innerR = createSphere(0.2, matPink);
@@ -686,12 +674,12 @@ window.setPetType = function (type) {
         const epR3 = createSphere(0.32, matEars); epR3.position.set(0, -1.1, 0.12); earRMesh.add(epR3);
         earR = earRMesh;
     } else if (type === 'bulldog') {
-        // Bulldog folded floppy rose ears
+        // Bulldog folded floppy rose ears in dark brown
         earLGroup.position.set(1.1, 0.7, 0.1);
         const earLMesh = createSphere(0.45, matEars);
         earLMesh.scale.set(0.5, 0.6, 0.75);
         earLMesh.position.set(0, -0.2, 0.1);
-        earLMesh.rotation.set(-0.4, 0, -0.3); // Rose ear fold
+        earLMesh.rotation.set(-0.45, 0.15, -0.35); // Rose fold tilt
         earLGroup.add(earLMesh);
         earL = earLMesh;
 
@@ -699,7 +687,7 @@ window.setPetType = function (type) {
         const earRMesh = createSphere(0.45, matEars);
         earRMesh.scale.set(0.5, 0.6, 0.75);
         earRMesh.position.set(0, -0.2, 0.1);
-        earRMesh.rotation.set(-0.4, 0, 0.3);
+        earRMesh.rotation.set(-0.45, -0.15, 0.35);
         earRGroup.add(earRMesh);
         earR = earRMesh;
     } else {
@@ -712,12 +700,12 @@ window.setPetType = function (type) {
 
     // --- Legs ---
     function createStandardLeg(colorLeg, colorPaw) {
-        const legGeo = new THREE.CylinderGeometry(0.35, 0.3, 1.0, 16);
+        const legGeo = new THREE.CylinderGeometry(0.32, 0.28, 1.0, 16);
         const legM = new THREE.Mesh(legGeo, new THREE.MeshStandardMaterial({ color: colorLeg, roughness: 0.8 }));
         legM.castShadow = true;
 
-        const pawM = createSphere(0.4, new THREE.MeshStandardMaterial({ color: colorPaw, roughness: 0.8 }));
-        pawM.scale.set(1.1, 0.8, 1.2);
+        const pawM = createSphere(0.38, new THREE.MeshStandardMaterial({ color: colorPaw, roughness: 0.8 }));
+        pawM.scale.set(1.15, 0.8, 1.25);
         pawM.position.set(0, -0.5, 0.1);
         legM.add(pawM);
         
@@ -725,14 +713,14 @@ window.setPetType = function (type) {
     }
 
     if (type === 'parrot') {
-        // Bird stands on 2 thin legs with talons grasping a bar/perch
-        const legGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.9, 16);
-        const legMat = new THREE.MeshStandardMaterial({ color: 0x4b5563, roughness: 0.7 });
+        // Cockatoo bird legs & talons gripping a bar/perch (Charcoal grey)
+        const legGeo = new THREE.CylinderGeometry(0.065, 0.065, 0.9, 16);
+        const legMat = new THREE.MeshStandardMaterial({ color: 0x374151, roughness: 0.75 });
         
         legBL = new THREE.Mesh(legGeo, legMat);
         legBL.castShadow = true;
         // 2 front claws, 1 back claw
-        const clawGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.28, 8);
+        const clawGeo = new THREE.CylinderGeometry(0.035, 0.035, 0.28, 8);
         const c1L = new THREE.Mesh(clawGeo, legMat); c1L.rotation.x = Math.PI/2; c1L.rotation.y = 0.2; c1L.position.set(0.08, -0.45, 0.18); legBL.add(c1L);
         const c2L = new THREE.Mesh(clawGeo, legMat); c2L.rotation.x = Math.PI/2; c2L.rotation.y = -0.2; c2L.position.set(-0.08, -0.45, 0.18); legBL.add(c2L);
         const c3L = new THREE.Mesh(clawGeo, legMat); c3L.rotation.x = -Math.PI/2; c3L.position.set(0, -0.45, -0.18); legBL.add(c3L);
@@ -755,49 +743,40 @@ window.setPetType = function (type) {
         dogGroup.add(legFL);
         dogGroup.add(legFR);
 
-        // Multi-layered feather wings on the sides
+        // Clean white Cockatoo wings with yellow underwing highlights
         wingLGroup = new THREE.Group();
-        wingLGroup.position.set(0.95, 1.5, 0);
+        wingLGroup.position.set(0.9, 1.5, 0);
         dogGroup.add(wingLGroup);
-        // Red base wing
-        const wLRed = createSphere(0.65, new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.8 }));
-        wLRed.scale.set(0.18, 1.25, 0.85);
-        wLRed.rotation.z = -0.1;
-        wingLGroup.add(wLRed);
-        // Yellow mid layers
-        const wLYellow = createSphere(0.55, new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.8 }));
-        wLYellow.scale.set(0.2, 0.95, 0.78);
-        wLYellow.position.set(0.08, -0.2, 0.15);
-        wingLGroup.add(wLYellow);
-        // Blue tips
-        const wLBlue = createSphere(0.45, new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.8 }));
-        wLBlue.scale.set(0.22, 0.7, 0.7);
-        wLBlue.position.set(0.12, -0.5, 0.25);
-        wingLGroup.add(wLBlue);
-        wingL = wLRed;
+        
+        const wLMain = createSphere(0.65, matMain); // White wing
+        wLMain.scale.set(0.18, 1.25, 0.85);
+        wLMain.rotation.z = -0.1;
+        wingLGroup.add(wLMain);
+        // Yellow underfeather patch
+        const wLYel = createSphere(0.5, new THREE.MeshStandardMaterial({ color: colorEars, roughness: 0.8 }));
+        wLYel.scale.set(0.2, 0.9, 0.7);
+        wLYel.position.set(0.05, -0.2, 0.1);
+        wingLGroup.add(wLYel);
+        wingL = wLMain;
 
         wingRGroup = new THREE.Group();
-        wingRGroup.position.set(-0.95, 1.5, 0);
+        wingRGroup.position.set(-0.9, 1.5, 0);
         dogGroup.add(wingRGroup);
-        // Red base wing
-        const wRRed = createSphere(0.65, new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.8 }));
-        wRRed.scale.set(0.18, 1.25, 0.85);
-        wRRed.rotation.z = 0.1;
-        wingRGroup.add(wRRed);
-        // Yellow mid layers
-        const wRYellow = createSphere(0.55, new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.8 }));
-        wRYellow.scale.set(0.2, 0.95, 0.78);
-        wRYellow.position.set(-0.08, -0.2, 0.15);
-        wingRGroup.add(wRYellow);
-        // Blue tips
-        const wRBlue = createSphere(0.45, new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.8 }));
-        wRBlue.scale.set(0.22, 0.7, 0.7);
-        wRBlue.position.set(-0.12, -0.5, 0.25);
-        wingRGroup.add(wRBlue);
-        wingR = wRRed;
+        
+        const wRMain = createSphere(0.65, matMain); // White wing
+        wRMain.scale.set(0.18, 1.25, 0.85);
+        wRMain.rotation.z = 0.1;
+        wingRGroup.add(wRMain);
+        // Yellow underfeather patch
+        const wRYel = createSphere(0.5, new THREE.MeshStandardMaterial({ color: colorEars, roughness: 0.8 }));
+        wRYel.scale.set(0.2, 0.9, 0.7);
+        wRYel.position.set(-0.05, -0.2, 0.1);
+        wingRGroup.add(wRYel);
+        wingR = wRMain;
     } else {
         let pawColor = colorAccent;
         if (type === 'poodle') pawColor = colorMain;
+        else if (type === 'cat') pawColor = colorAccent; // Seal point brown socks!
 
         legFL = createStandardLeg(colorMain, pawColor);
         legFR = createStandardLeg(colorMain, pawColor);
@@ -838,66 +817,70 @@ window.setPetType = function (type) {
     dogGroup.add(tailGroup);
 
     if (type === 'shiba') {
-        // Curled Shiba tail with white tip (Double-sphere curled construction)
+        // Curly Shiba tail (4 chained spheres curled into a Q shape)
         tail = createSphere(0.45, matEars);
-        tail.scale.set(0.95, 1.3, 0.95);
-        tail.position.set(0, 0.45, -0.2);
+        tail.scale.set(0.95, 1.25, 0.95);
+        tail.position.set(0, 0.4, -0.25);
         tail.rotation.x = -1.55;
         
-        const tailMid = createSphere(0.38, matEars);
-        tailMid.position.set(0, 0.4, 0.22);
-        tail.add(tailMid);
+        const tailSeg1 = createSphere(0.38, matMain);
+        tailSeg1.position.set(0, 0.35, 0.22);
+        tail.add(tailSeg1);
 
-        const tailTip = createSphere(0.32, matAccent);
-        tailTip.position.set(0, 0.32, 0.28);
-        tailMid.add(tailTip);
+        const tailSeg2 = createSphere(0.32, matMain);
+        tailSeg2.position.set(0, 0.22, 0.28);
+        tailSeg1.add(tailSeg2);
+
+        const tailTip = createSphere(0.28, matAccent); // White tip
+        tailTip.position.set(0, 0.15, 0.25);
+        tailSeg2.add(tailTip);
 
         tailGroup.add(tail);
     } else if (type === 'poodle') {
-        // Fluffy poodle tail (thin stem + puffy puff pom-pom)
-        const tailBase = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.65, 8), matMain);
-        tailBase.position.set(0, 0.28, -0.28);
-        tailBase.rotation.x = 0.8;
+        // Fluffy poodle tail (thin stem + puffy pom-pom)
+        const tailBase = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.7, 8), matMain);
+        tailBase.position.set(0, 0.3, -0.28);
+        tailBase.rotation.x = 0.85;
         tailGroup.add(tailBase);
         
-        const tailPuff = createSphere(0.45, matEars);
-        tailPuff.position.set(0, 0.4, 0);
+        const tailPuff = createSphere(0.46, matEars);
+        tailPuff.position.set(0, 0.42, 0);
         tailBase.add(tailPuff);
         tail = tailBase;
     } else if (type === 'bulldog') {
-        // Short stubby corkscrew tail
+        // Short stubby tail in patch brown
         tail = createSphere(0.32, matEars);
         tail.scale.set(0.65, 0.65, 0.65);
         tail.position.set(0, 0.18, -0.18);
         tail.rotation.x = -0.3;
         tailGroup.add(tail);
     } else if (type === 'cat') {
-        // Cat long curved segmented tail (4 chain-linked spheres)
-        const t1 = createSphere(0.22, matMain);
+        // Long curved Siamese point tail (4 chain-linked spheres, dark seal brown)
+        const t1 = createSphere(0.2, matAccent);
         t1.position.set(0, 0.18, -0.18);
         tailGroup.add(t1);
         
-        const t2 = createSphere(0.19, matMain); t2.position.set(0, 0.26, 0.08); t1.add(t2);
-        const t3 = createSphere(0.17, matMain); t3.position.set(0, 0.26, 0.15); t2.add(t3);
-        const t4 = createSphere(0.15, matMain); t4.position.set(0, 0.22, 0.2); t3.add(t4);
+        const t2 = createSphere(0.18, matAccent); t2.position.set(0, 0.26, 0.08); t1.add(t2);
+        const t3 = createSphere(0.16, matAccent); t3.position.set(0, 0.26, 0.15); t2.add(t3);
+        const t4 = createSphere(0.14, matAccent); t4.position.set(0, 0.22, 0.2); t3.add(t4);
         
         tail = t1;
     } else if (type === 'parrot') {
-        // Multi-feathered flat parrot tail
+        // Sulphur-Crested Cockatoo flat white tail feathers
         const tailCenter = createSphere(0.4, matMain);
         tailCenter.scale.set(0.8, 1.8, 0.15);
         tailCenter.position.set(0, -0.4, -0.65);
         tailCenter.rotation.x = -0.75;
         tailGroup.add(tailCenter);
 
-        const tailL = createSphere(0.32, new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.8 }));
+        const tailL = createSphere(0.32, matMain);
         tailL.scale.set(0.7, 1.5, 0.15);
         tailL.position.set(0.22, -0.45, -0.6);
         tailL.rotation.x = -0.75;
         tailL.rotation.y = -0.15;
         tailGroup.add(tailL);
 
-        const tailR = createSphere(0.32, new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.8 }));
+        const tailR = createSphere(0.32, matMain);
         tailR.scale.set(0.7, 1.5, 0.15);
         tailR.position.set(-0.22, -0.45, -0.6);
         tailR.rotation.x = -0.75;
@@ -961,7 +944,7 @@ window.setDogAnimation = function (animName) {
     const petType = window.activePetType || 'shiba';
     const cfg = PET_BASE_CONFIGS[petType] || PET_BASE_CONFIGS.shiba;
 
-    // Reset positions/rotations to species baseline
+    // Reset positions/rotations to species baseline configuration
     dogGroup.position.set(0, 0, 0);
     dogGroup.rotation.set(0, 0, 0);
     if (headGroup) {
@@ -1194,7 +1177,7 @@ function animate() {
             earRGroup.rotation.z = (petType === 'poodle' ? 0.1 : (petType === 'bulldog' ? 0.4 : 0.3)) - Math.sin(animTime * 2) * 0.05;
         }
         
-        if (tongue && tongue.scale && petType !== 'parrot') {
+        if (tongue && tongue.scale && petType !== 'parrot' && petType !== 'cat') {
             tongue.scale.z = 1.2 + Math.abs(Math.sin(animTime * 5)) * 0.3;
         }
 
@@ -1225,7 +1208,7 @@ function animate() {
             eyeL.scale.y = 0.3;
             eyeR.scale.y = 0.3;
         }
-        if (tongue && tongue.scale && petType !== 'parrot') {
+        if (tongue && tongue.scale && petType !== 'parrot' && petType !== 'cat') {
             tongue.scale.z = 1.4 + Math.abs(Math.sin(animTime * 15)) * 0.4;
         }
 
@@ -1327,7 +1310,7 @@ function animate() {
             boneGroup.visible = false;
             let t = Math.min(fetchTime / 1.5, 1.0);
 
-            dogGroup.position.y = Math.abs(Math.sin(fetchTime * 10)) * 0.8;
+            dogGroup.position.y = Math.abs(fetchTime * 10) * 0.8;
             if (tailGroup) tailGroup.rotation.y = Math.sin(fetchTime * 25) * 0.8;
             if (headGroup) headGroup.rotation.x = -0.2 + Math.sin(fetchTime * 10) * 0.1;
 
