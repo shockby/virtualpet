@@ -44,9 +44,14 @@
                             <input type="checkbox" id="checkbox-local-mode"> 🤖 APIを使わずローカル応答のみにする (クォータ節約)
                         </label>
                     </div>
+                    <div class="api-quota-row">
+                        <span>📊 本日のAPI使用数: <strong id="api-count-display">0</strong> / 500</span>
+                        <button id="btn-reset-count" class="reset-count-btn" title="カウンターをリセット">🔄 リセット</button>
+                    </div>
                     <div class="key-warning-box">
                         ⚠️ <strong>セキュリティ上の注意:</strong> 入力されたAPIキーはブラウザの <code>localStorage</code> に保存されます。第三者と共有するパソコン等では使用しないでください。
                     </div>
+
                 </div>
 
                 <!-- Spontaneous thought bubble -->

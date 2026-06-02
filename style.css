@@ -410,7 +410,43 @@ header h1 {
     font-weight: 500;
 }
 
+.api-quota-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: rgba(59, 130, 246, 0.06);
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.api-quota-row strong {
+    color: #2563eb;
+    font-weight: 700;
+}
+
+.reset-count-btn {
+    border: none;
+    background: rgba(59, 130, 246, 0.12);
+    color: #2563eb;
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-family: inherit;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.reset-count-btn:hover {
+    background: rgba(59, 130, 246, 0.22);
+}
+
 .key-warning-box {
+
     margin-top: 4px;
     padding: 8px 10px;
     border-radius: 8px;
