@@ -95,11 +95,12 @@ const PET_BASE_CONFIGS = {
         bodyPos: { x: 0, y: 1.45, z: 0 }
     },
     bulldog: {
-        legFL: { x: 1.15, y: 0.45, z: 0.8, rx: 0, ry: 0, rz: 0.22, sx: 1.3, sy: 0.7, sz: 1.3 },
-        legFR: { x: -1.15, y: 0.45, z: 0.8, rx: 0, ry: 0, rz: -0.22, sx: 1.3, sy: 0.7, sz: 1.3 },
-        legBL: { x: 0.9, y: 0.45, z: -0.8, rx: 0, ry: 0, rz: 0, sx: 1.1, sy: 0.7, sz: 1.1 },
-        legBR: { x: -0.9, y: 0.45, z: -0.8, rx: 0, ry: 0, rz: 0, sx: 1.1, sy: 0.7, sz: 1.1 },
-        headGroup: { x: 0, y: 2.1, z: 1.1, rx: 0, ry: 0, rz: 0 },
+        // Reduced rotation angle and pulled back-legs further back to represent a sturdy dog alignment
+        legFL: { x: 1.1, y: 0.45, z: 0.7, rx: 0, ry: 0, rz: 0.12, sx: 1.25, sy: 0.7, sz: 1.25 },
+        legFR: { x: -1.1, y: 0.45, z: 0.7, rx: 0, ry: 0, rz: -0.12, sx: 1.25, sy: 0.7, sz: 1.25 },
+        legBL: { x: 0.85, y: 0.45, z: -0.9, rx: 0, ry: 0, rz: 0, sx: 1.05, sy: 0.7, sz: 1.05 },
+        legBR: { x: -0.85, y: 0.45, z: -0.9, rx: 0, ry: 0, rz: 0, sx: 1.05, sy: 0.7, sz: 1.05 },
+        headGroup: { x: 0, y: 2.2, z: 1.2, rx: 0, ry: 0, rz: 0 },
         tailGroup: { x: 0, y: 1.3, z: -1.2, rx: 0, ry: 0, rz: 0 },
         bodyScale: { x: 1.35, y: 0.9, z: 1.15 },
         bellyScale: { x: 1.1, y: 0.8, z: 1.1 },
@@ -121,13 +122,14 @@ const PET_BASE_CONFIGS = {
     parrot: {
         legFL: { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, sx: 0.001, sy: 0.001, sz: 0.001 },
         legFR: { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, sx: 0.001, sy: 0.001, sz: 0.001 },
-        legBL: { x: 0.35, y: 0.45, z: 0.0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
-        legBR: { x: -0.35, y: 0.45, z: 0.0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
-        headGroup: { x: 0, y: 2.7, z: 0.3, rx: 0, ry: 0, rz: 0 },
-        tailGroup: { x: 0, y: 1.0, z: -0.7, rx: 0, ry: 0, rz: 0 },
+        // Angle legs slightly forward for parrot perched posture
+        legBL: { x: 0.32, y: 0.45, z: 0.1, rx: -0.2, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
+        legBR: { x: -0.32, y: 0.45, z: 0.1, rx: -0.2, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
+        headGroup: { x: 0, y: 2.7, z: 0.6, rx: 0, ry: 0, rz: 0 },
+        tailGroup: { x: 0, y: 0.8, z: -0.9, rx: 0, ry: 0, rz: 0 },
         bodyScale: { x: 0.8, y: 1.2, z: 0.8 },
         bellyScale: { x: 0.7, y: 0.9, z: 0.75 },
-        bellyPos: { x: 0, y: 1.35, z: 0.2 },
+        bellyPos: { x: 0, y: 1.25, z: 0.35 },
         bodyPos: { x: 0, y: 1.45, z: 0 }
     }
 };
@@ -211,6 +213,11 @@ window.setPetType = function (type) {
         body = createSphere(1.6, matMain);
         body.position.y = cfg.bodyPos.y;
         body.scale.set(cfg.bodyScale.x, cfg.bodyScale.y, cfg.bodyScale.z);
+        
+        if (type === 'parrot') {
+            // Forward tilt for perched posture
+            body.rotation.x = 0.35;
+        }
     }
 
     // Body additions & markings
@@ -278,6 +285,10 @@ window.setPetType = function (type) {
     if (type !== 'poodle' && type !== 'cat' && type !== 'parrot') {
         // Siamese and Cockatoo use natural body colors for bellies
         dogGroup.add(belly);
+    } else if (type === 'parrot') {
+        // Belly of cockatoo tilts forward alongside body
+        belly.rotation.x = 0.35;
+        dogGroup.add(belly);
     }
 
     // --- Head Group & Head ---
@@ -337,24 +348,29 @@ window.setPetType = function (type) {
         eyebrowR.rotation.z = 0.1;
         headGroup.add(eyebrowR);
     } else if (type === 'parrot') {
-        // Cockatoo Sulphur crest feathers (flaring backwards gracefully)
+        // Cockatoo Sulphur crest feathers (Cone structure to look like feathers, NOT round balls)
+        const crestGeo = new THREE.ConeGeometry(0.14, 0.75, 4);
+        const crestMat = matAccent; // Yellow
         for (let i = 0; i < 3; i++) {
-            const crest = createSphere(0.25, matAccent); // Bright yellow
-            crest.scale.set(0.24, 1.1, 0.48);
-            crest.position.set(0, 0.95 + i * 0.18, -0.15 - i * 0.12);
-            crest.rotation.x = -0.45 - i * 0.38;
+            const crest = new THREE.Mesh(crestGeo, crestMat);
+            crest.scale.set(0.22, 1.0, 0.55);
+            crest.position.set(0, 0.9 + i * 0.16, -0.12 - i * 0.12);
+            crest.rotation.x = -0.4 - i * 0.32;
             headGroup.add(crest);
         }
     } else if (type === 'bulldog') {
-        // Bulldog forehead and snout wrinkle folds
-        const w1 = createSphere(0.4, matMain);
-        w1.scale.set(1.2, 0.2, 0.3);
-        w1.position.set(0, 0.42, 0.9);
+        // Bulldog forehead thin skin wrinkles using Torus geometries
+        const wrinkleGeo = new THREE.TorusGeometry(0.35, 0.05, 8, 16, Math.PI);
+        const w1 = new THREE.Mesh(wrinkleGeo, matMain);
+        w1.scale.set(1.3, 0.6, 0.5);
+        w1.position.set(0, 0.38, 0.92);
+        w1.rotation.x = 0.3;
         headGroup.add(w1);
 
-        const w2 = createSphere(0.4, matMain);
-        w2.scale.set(0.9, 0.18, 0.25);
-        w2.position.set(0, 0.25, 0.95);
+        const w2 = new THREE.Mesh(wrinkleGeo, matMain);
+        w2.scale.set(1.0, 0.5, 0.5);
+        w2.position.set(0, 0.22, 0.96);
+        w2.rotation.x = 0.3;
         headGroup.add(w2);
 
         // Pied dark patch over the left eye/ear area
@@ -373,19 +389,19 @@ window.setPetType = function (type) {
 
     // --- Snout & Mouth (or Beak for Parrot) ---
     if (type === 'parrot') {
-        // Large curved Cockatoo beak (Dark grey/black)
+        // Hooked cockatoo beak
         const beakUpperGeo = new THREE.SphereGeometry(0.48, 32, 32);
         const beakUpper = new THREE.Mesh(beakUpperGeo, matDark);
-        beakUpper.scale.set(0.72, 1.35, 1.35);
-        beakUpper.position.set(0, -0.08, 0.85);
-        beakUpper.rotation.x = 0.45;
+        beakUpper.scale.set(0.7, 1.3, 1.3);
+        beakUpper.position.set(0, -0.1, 0.88);
+        beakUpper.rotation.x = 0.42;
         headGroup.add(beakUpper);
         beak = beakUpper;
 
-        const beakLowerGeo = new THREE.SphereGeometry(0.3, 32, 32);
+        const beakLowerGeo = new THREE.SphereGeometry(0.28, 32, 32);
         const beakLower = new THREE.Mesh(beakLowerGeo, matDark);
-        beakLower.scale.set(0.65, 0.5, 0.8);
-        beakLower.position.set(0, -0.48, 0.68);
+        beakLower.scale.set(0.6, 0.5, 0.75);
+        beakLower.position.set(0, -0.48, 0.7);
         headGroup.add(beakLower);
 
         // Dummy snout for bone fetch
@@ -414,21 +430,21 @@ window.setPetType = function (type) {
             jowlR.position.set(-0.42, -0.25, 0.1);
             snout.add(jowlR);
 
-            // Underbite chin + 2 tiny teeth
+            // Underbite chin + 2 tiny teeth (reduced size to look like real teeth)
             const chin = createSphere(0.42, matMain);
             chin.scale.set(1.05, 0.5, 0.85);
             chin.position.set(0, -0.55, 0.85);
             headGroup.add(chin);
 
-            const toothGeo = new THREE.ConeGeometry(0.06, 0.22, 8);
+            const toothGeo = new THREE.ConeGeometry(0.04, 0.15, 8);
             const toothMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1 });
             const tL = new THREE.Mesh(toothGeo, toothMat);
-            tL.rotation.x = -0.15;
-            tL.position.set(0.24, 0.18, 0.2);
+            tL.rotation.x = -0.1;
+            tL.position.set(0.22, 0.18, 0.2);
             chin.add(tL);
             const tR = new THREE.Mesh(toothGeo, toothMat);
-            tR.rotation.x = -0.15;
-            tR.position.set(-0.24, 0.18, 0.2);
+            tR.rotation.x = -0.1;
+            tR.position.set(-0.22, 0.18, 0.2);
             chin.add(tR);
         } else if (type === 'cat') {
             // Cat ω whisker pads in seal point dark brown
@@ -532,7 +548,7 @@ window.setPetType = function (type) {
         
         const catEyeL = createSphere(0.21, matSiameseEye);
         catEyeL.scale.set(1.2, 0.95, 0.95);
-        catEyeL.position.set(0.44, 0.28, 1.15); // Z pushed forward from 0.82 to 1.15 to sit on mask surface
+        catEyeL.position.set(0.44, 0.28, 1.15); // Z pushed forward to sit on mask surface
         catEyeL.rotation.z = -0.12;
         eyeGroupBase.add(catEyeL);
         eyeL = createSphere(0.08, matDark);
@@ -701,20 +717,18 @@ window.setPetType = function (type) {
         const epR3 = createSphere(0.32, matEars); epR3.position.set(0, -1.1, 0.12); earRMesh.add(epR3);
         earR = earRMesh;
     } else if (type === 'bulldog') {
-        // Bulldog folded floppy rose ears in dark brown
+        // Bulldog folded floppy ears (properly folded "rose ears" using cones)
         earLGroup.position.set(1.1, 0.7, 0.1);
-        const earLMesh = createSphere(0.45, matEars);
-        earLMesh.scale.set(0.5, 0.6, 0.75);
-        earLMesh.position.set(0, -0.2, 0.1);
-        earLMesh.rotation.set(-0.45, 0.15, -0.35); // Rose fold tilt
+        const earLMesh = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.6, 4), matEars);
+        earLMesh.scale.set(0.7, 1.1, 0.4);
+        earLMesh.rotation.set(-0.6, 0.1, -0.5); // Refined folded direction
         earLGroup.add(earLMesh);
         earL = earLMesh;
 
         earRGroup.position.set(-1.1, 0.7, 0.1);
-        const earRMesh = createSphere(0.45, matEars);
-        earRMesh.scale.set(0.5, 0.6, 0.75);
-        earRMesh.position.set(0, -0.2, 0.1);
-        earRMesh.rotation.set(-0.45, -0.15, 0.35);
+        const earRMesh = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.6, 4), matEars);
+        earRMesh.scale.set(0.7, 1.1, 0.4);
+        earRMesh.rotation.set(-0.6, -0.1, 0.5);
         earRGroup.add(earRMesh);
         earR = earRMesh;
     } else {
@@ -752,6 +766,7 @@ window.setPetType = function (type) {
         const c2L = new THREE.Mesh(clawGeo, legMat); c2L.rotation.x = Math.PI/2; c2L.rotation.y = -0.2; c2L.position.set(-0.08, -0.45, 0.18); legBL.add(c2L);
         const c3L = new THREE.Mesh(clawGeo, legMat); c3L.rotation.x = -Math.PI/2; c3L.position.set(0, -0.45, -0.18); legBL.add(c3L);
         legBL.position.set(cfg.legBL.x, cfg.legBL.y, cfg.legBL.z);
+        legBL.rotation.x = cfg.legBL.rx;
         dogGroup.add(legBL);
 
         legBR = new THREE.Mesh(legGeo, legMat);
@@ -760,6 +775,7 @@ window.setPetType = function (type) {
         const c2R = new THREE.Mesh(clawGeo, legMat); c2R.rotation.x = Math.PI/2; c2R.rotation.y = -0.2; c2R.position.set(-0.08, -0.45, 0.18); legBR.add(c2R);
         const c3R = new THREE.Mesh(clawGeo, legMat); c3R.rotation.x = -Math.PI/2; c3R.position.set(0, -0.45, -0.18); legBR.add(c3R);
         legBR.position.set(cfg.legBR.x, cfg.legBR.y, cfg.legBR.z);
+        legBR.rotation.x = cfg.legBR.rx;
         dogGroup.add(legBR);
 
         // Dummy invisible front legs to keep loop code happy
@@ -770,14 +786,14 @@ window.setPetType = function (type) {
         dogGroup.add(legFL);
         dogGroup.add(legFR);
 
-        // Clean white Cockatoo wings with yellow underwing highlights
+        // Clean white Cockatoo wings folded diagonally along body
         wingLGroup = new THREE.Group();
-        wingLGroup.position.set(0.9, 1.5, 0);
+        wingLGroup.position.set(0.75, 1.4, -0.15);
+        wingLGroup.rotation.set(0.3, -0.15, 0.25); // Slanted backwards/inwards
         dogGroup.add(wingLGroup);
         
         const wLMain = createSphere(0.65, matMain); // White wing
         wLMain.scale.set(0.18, 1.25, 0.85);
-        wLMain.rotation.z = -0.1;
         wingLGroup.add(wLMain);
         // Yellow underfeather patch
         const wLYel = createSphere(0.5, new THREE.MeshStandardMaterial({ color: colorEars, roughness: 0.8 }));
@@ -787,12 +803,12 @@ window.setPetType = function (type) {
         wingL = wLMain;
 
         wingRGroup = new THREE.Group();
-        wingRGroup.position.set(-0.9, 1.5, 0);
+        wingRGroup.position.set(-0.75, 1.4, -0.15);
+        wingRGroup.rotation.set(0.3, 0.15, -0.25);
         dogGroup.add(wingRGroup);
         
         const wRMain = createSphere(0.65, matMain); // White wing
         wRMain.scale.set(0.18, 1.25, 0.85);
-        wRMain.rotation.z = 0.1;
         wingRGroup.add(wRMain);
         // Yellow underfeather patch
         const wRYel = createSphere(0.5, new THREE.MeshStandardMaterial({ color: colorEars, roughness: 0.8 }));
@@ -1350,26 +1366,29 @@ function animate() {
     // Parrot Wing Flapping Animation
     if (petType === 'parrot' && wingLGroup && wingRGroup) {
         if (currentAnim === 'idle') {
-            wingLGroup.rotation.z = -1.1 - Math.sin(animTime * 2.0) * 0.08;
-            wingRGroup.rotation.z = 1.1 + Math.sin(animTime * 2.0) * 0.08;
-            wingLGroup.rotation.x = -0.1 + Math.sin(animTime * 1.0) * 0.04;
-            wingRGroup.rotation.x = -0.1 + Math.sin(animTime * 1.0) * 0.04;
+            // Keep wings folded close to the body in idle
+            wingLGroup.rotation.z = 0.25 - Math.sin(animTime * 2.0) * 0.03;
+            wingRGroup.rotation.z = -0.25 + Math.sin(animTime * 2.0) * 0.03;
+            wingLGroup.rotation.x = 0.3 + Math.sin(animTime * 1.0) * 0.02;
+            wingRGroup.rotation.x = 0.3 + Math.sin(animTime * 1.0) * 0.02;
         } else if (currentAnim === 'happy' || fetchPhase === 'grabbing' || fetchPhase === 'returning') {
-            // Rapid flapping
+            // Rapid flapping (extends outward and beats)
             wingLGroup.rotation.z = -0.7 - Math.sin(animTime * 25.0) * 0.6;
             wingRGroup.rotation.z = 0.7 + Math.sin(animTime * 25.0) * 0.6;
+            wingLGroup.rotation.x = Math.sin(animTime * 25.0) * 0.2;
+            wingRGroup.rotation.x = Math.sin(animTime * 25.0) * 0.2;
         } else if (currentAnim === 'sleep') {
-            wingLGroup.rotation.z = -0.3;
-            wingRGroup.rotation.z = 0.3;
-            wingLGroup.rotation.x = -0.2;
-            wingRGroup.rotation.x = -0.2;
+            wingLGroup.rotation.z = 0.15;
+            wingRGroup.rotation.z = -0.15;
+            wingLGroup.rotation.x = 0.4;
+            wingRGroup.rotation.x = 0.4;
         } else if (currentAnim === 'sit') {
-            wingLGroup.rotation.z = -0.8 - Math.sin(animTime * 1.5) * 0.05;
-            wingRGroup.rotation.z = 0.8 + Math.sin(animTime * 1.5) * 0.05;
+            wingLGroup.rotation.z = 0.2 - Math.sin(animTime * 1.5) * 0.02;
+            wingRGroup.rotation.z = -0.2 + Math.sin(animTime * 1.5) * 0.02;
         } else if (currentAnim === 'paw') {
             // Wave left wing
             wingLGroup.rotation.z = -0.6 - Math.sin(animTime * 15.0) * 0.5;
-            wingRGroup.rotation.z = 0.9;
+            wingRGroup.rotation.z = -0.2;
         }
     }
 
