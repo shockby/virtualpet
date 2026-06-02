@@ -774,9 +774,9 @@ function applyShapeChanges(shape) {
 
 // Model fallback chain for free tier quota management
 const GEMINI_MODELS = [
-    'gemini-2.0-flash-lite',   // 30 RPM free tier (primary)
-    'gemini-1.5-flash',        // 15 RPM free tier (fallback 1)
-    'gemini-1.5-pro',          // 2 RPM free tier (fallback 2)
+    'gemini-3.5-flash',        // Latest GA Flash model (smart, fast)
+    'gemini-3.1-flash-lite',   // High-volume, low-latency lite model
+    'gemini-2.5-flash',        // Stable fallback Flash model
 ];
 
 // Rate limiting: track last request time per model
