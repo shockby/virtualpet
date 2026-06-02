@@ -84,8 +84,6 @@
                     <button type="button" class="prompt-chip" data-prompt="お手！">👋 お手！</button>
                     <button type="button" class="prompt-chip" data-prompt="待て！">✨ 待て！</button>
                     <button type="button" class="prompt-chip" data-prompt="骨を投げて！">🦴 骨投げ</button>
-                    <button type="button" class="prompt-chip" data-prompt="大きくなーれ！">🦁 巨大化！</button>
-                    <button type="button" class="prompt-chip" data-prompt="ちっちゃくなって！">🐭 小型化！</button>
                 </div>
             </div>
         </main>
@@ -154,6 +152,22 @@
                             <input type="text" id="input-pet-name" placeholder="ペットの名前を入力..." style="padding: 10px; border-radius: 8px; border: 1px solid var(--panel-border); background: white; font-family: inherit; font-size: 1rem; color: var(--text-main); outline: none; flex-grow: 1; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);">
                             <button id="btn-save-name" style="padding: 10px 16px; border-radius: 8px; border: none; background: #3b82f6; color: white; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: background 0.2s; box-shadow: 0 2px 4px rgba(59,130,246,0.2);">Save</button>
                         </div>
+                    </div>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid var(--panel-border); margin: 15px 0;">
+
+                <!-- Pet Type -->
+                <div class="customizer-panel" style="border-top: none; padding-top: 0; margin-bottom: 5px;">
+                    <div class="slider-group">
+                        <label style="margin-bottom: 8px; font-weight: 600; color: var(--text-muted);">Pet Type (ペットの種類):</label>
+                        <select id="select-pet-type" style="padding: 10px; border-radius: 8px; border: 1px solid var(--panel-border); background: white; font-family: inherit; font-size: 1rem; color: var(--text-main); outline: none; cursor: pointer; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <option value="shiba">柴犬 (Shiba Inu)</option>
+                            <option value="poodle">トイプードル (Toy Poodle)</option>
+                            <option value="bulldog">ブルドッグ (Bulldog)</option>
+                            <option value="cat">猫 (Cat)</option>
+                            <option value="parrot">オウム (Parrot)</option>
+                        </select>
                     </div>
                 </div>
 
