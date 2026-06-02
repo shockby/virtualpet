@@ -46,6 +46,7 @@ const btnClosePersonality = document.getElementById('btn-close-personality');
 // Name Input elements
 const inputPetName = document.getElementById('input-pet-name');
 const btnSaveName = document.getElementById('btn-save-name');
+const selectPetType = document.getElementById('select-pet-type');
 
 // Constants
 const MAX_STAT = 100;
@@ -58,7 +59,8 @@ let state = {
     energy: 100,
     isSleeping: false,
     currentAction: null, // 'eating', 'playing', etc.
-    personality: 'normal'
+    personality: 'normal',
+    petType: localStorage.getItem('pet_type') || 'shiba'
 };
 
 const personalities = {
@@ -104,6 +106,17 @@ function init() {
     updateApiKeyUI();
     updatePetNameUI();
     
+    // Set initial greeting based on pet type
+    if (chatLog) {
+        const welcomeText = getWelcomeText(state.petType);
+        chatLog.innerHTML = `<div class="chat-message pet"><div class="message-content">${welcomeText}</div></div>`;
+    }
+
+    // Set initial 3D pet type
+    if (window.setPetType) {
+        window.setPetType(state.petType);
+    }
+
     // Start game loop: ticks every 3 seconds
     setInterval(gameTick, 3000);
     // Spontaneous thought checker: runs every 60 seconds
@@ -125,6 +138,35 @@ function init() {
             if (window.setDogPersonality) {
                 window.setDogPersonality(state.personality);
             }
+            resetInactivityTimer();
+        });
+    }
+
+    if (selectPetType) {
+        selectPetType.value = state.petType;
+        selectPetType.addEventListener('change', (e) => {
+            state.petType = e.target.value;
+            localStorage.setItem('pet_type', state.petType);
+            if (window.setPetType) {
+                window.setPetType(state.petType);
+            }
+            
+            // Re-trigger greeting on change
+            let changeReply = "";
+            if (state.petType === 'cat') {
+                changeReply = "ニャーオ！猫に変身したにゃ！よろしくにゃ🐾";
+            } else if (state.petType === 'parrot') {
+                changeReply = "ハロー！オウムに変身！パタパタパタ！🦜";
+            } else if (state.petType === 'poodle') {
+                changeReply = "クゥーン！トイプードルに変身したプー！よろしくワン🐾";
+            } else if (state.petType === 'bulldog') {
+                changeReply = "バウバウ！ブルドッグに変身したぜ！よろしくな！🐾";
+            } else {
+                changeReply = "ワン！柴犬に変身したワン！よろしくワン！🐾";
+            }
+            appendChatMessage('pet', changeReply);
+            speakText(changeReply);
+            
             resetInactivityTimer();
         });
     }
@@ -175,8 +217,23 @@ function init() {
             localStorage.setItem('pet_name', petName);
             updatePetNameUI();
             
-            appendChatMessage('pet', `ワンッ！新しい名前「${petName}」にしてくれてありがとうだワン！🐾`);
-            speakText(`新しい名前、${petName}にしてくれてありがとうだワン！`);
+            let thankReply = `ワンッ！新しい名前「${petName}」にしてくれてありがとうだワン！🐾`;
+            let thankSpeech = `新しい名前、${petName}にしてくれてありがとうだワン！`;
+            if (state.petType === 'cat') {
+                thankReply = `にゃおん！新しい名前「${petName}」にしてくれてありがとうにゃん！🐾`;
+                thankSpeech = `新しい名前、${petName}にしてくれてありがとうにゃん！`;
+            } else if (state.petType === 'parrot') {
+                thankReply = `ハロー！新しい名前「${petName}」！ありがとうオウム！🦜`;
+                thankSpeech = `新しい名前、${petName}！ありがとうオウム！`;
+            } else if (state.petType === 'poodle') {
+                thankReply = `キャッ！新しい名前「${petName}」にしてくれてありがとうプー！🐾`;
+                thankSpeech = `新しい名前、${petName}にしてくれてありがとうプー！`;
+            } else if (state.petType === 'bulldog') {
+                thankReply = `フガッ！新しい名前「${petName}」にしてくれてありがとうだぜ！🐾`;
+                thankSpeech = `新しい名前、${petName}にしてくれてありがとうだぜ！`;
+            }
+            appendChatMessage('pet', thankReply);
+            speakText(thankSpeech);
             
             // Auto close modal to show title transition
             setTimeout(() => {
@@ -497,6 +554,22 @@ function updateApiKeyUI() {
     }
 }
 
+function getWelcomeText(type) {
+    if (type === 'cat') return "ニャーオ！私とお話しするにゃ？🐾";
+    if (type === 'parrot') return "ハロー！ハロー！ボクとお話ししよう！🦜";
+    if (type === 'poodle') return "クゥーン！ぼくとお話しするプー？🐾";
+    if (type === 'bulldog') return "バウバウ！オレとお話ししようぜ！🐾";
+    return "ワンワン！ぼくとお話ししようワン！🐾";
+}
+
+function getPetTypeJA() {
+    if (state.petType === 'cat') return '猫';
+    if (state.petType === 'parrot') return 'オウム';
+    if (state.petType === 'poodle') return 'トイプードル';
+    if (state.petType === 'bulldog') return 'ブルドッグ';
+    return '柴犬';
+}
+
 // Name UI updates
 function updatePetNameUI() {
     const headerTitle = document.querySelector('header h1');
@@ -539,10 +612,36 @@ function resetInactivityTimer() {
 
 // Local fallback thoughts (no API call)
 const LOCAL_THOUGHTS = {
-    normal:   ['遊んで遊んで遊んでだワン！', 'お手やりたいなワン。', 'お散歩行きたいワン～'],
-    energetic: ['生きてるの最高だワン！！', '走り回りたいワン！', '順調ルンルンワン！！！'],
-    lazy:      ['ふにゃあ～ねむいワン…', 'なんか食べたいワン…', 'ごろごろしたいワン…'],
-    glutton:  ['おなかすいたワン！', '骨におやつ欲しいワン…', 'ごはんまだワン？']
+    shiba: {
+        normal:   ['遊んで遊んで遊んでだワン！', 'お手やりたいなワン。', 'お散歩行きたいワン～'],
+        energetic: ['生きてるの最高だワン！！', '走り回りたいワン！', '順調ルンルンワン！！！'],
+        lazy:      ['ふにゃあ～ねむいワン…', 'なんか食べたいワン…', 'ごろごろしたいワン…'],
+        glutton:  ['おなかすいたワン！', '骨におやつ欲しいワン…', 'ごはんまだワン？']
+    },
+    poodle: {
+        normal:   ['なでなでしてプー！', '遊んでほしいプー！🐾', 'おやつほしいワン！'],
+        energetic: ['遊ぼう！遊ぼう！遊ぼう！プー！', 'トイプーパワー全開だワン！', 'ルンルンプゥー！🌟'],
+        lazy:      ['うにゃあ…ねむねむプー…', 'だらだらするプー…', '抱っこしてワン…'],
+        glutton:  ['おいしいおやつまだプー？', 'お腹ぺこぺこだワン！', 'もぐもぐしたいプー！']
+    },
+    bulldog: {
+        normal:   ['のんびりいこうぜ。', 'バウ！遊ぶか？', 'フガフガ…良い天気だぜ。'],
+        energetic: ['バウバウ！走るぜ！相棒、ついてこいよな！🐾', 'フゴフゴ！絶好調だぜ！🐾', '楽しいぜ！'],
+        lazy:      ['ふぅ…動くのめんどいぜ…', '寝るのが一番だぜ…', 'フガ…あくびが出るぜ…'],
+        glutton:  ['肉！肉をくれだぜ！🍖', 'フガフガ…いい匂いがするぜ！', '腹減ったぜ…']
+    },
+    cat: {
+        normal:   ['ニャーオ、遊ぶにゃ？', 'ゴロゴロ…撫でてにゃ。', '日向ぼっこするにゃ〜'],
+        energetic: ['ニャッ！走り回るにゃ！🐾', 'おもちゃ追っかけるにゃ！', '元気いっぱいにゃ！'],
+        lazy:      ['ふにゃあ…眠いにゃ…💤', 'こたつで丸くなりたいにゃ…', 'だらだらするにゃん…'],
+        glutton:  ['ちゅーるほしいにゃ！', 'お魚の匂いがするにゃん！', 'ご飯まだにゃ？']
+    },
+    parrot: {
+        normal:   ['ハロー！オハヨウ！', 'おしゃべりするオウム！', 'パタパタ…遊ぶ？'],
+        energetic: ['パタパタパタ！飛ぶオウム！', 'ワッハッハ！元気オウム！', '楽しいね！楽しいね！'],
+        lazy:      ['ふぅ…おやすみオウム…', 'ウトウト…眠いよ…', 'ボーっとするオウム…'],
+        glutton:  ['ヒマワリのタネ！タネ！🦜', 'くだもの美味しいオウム！', 'お腹すいたオウム！']
+    }
 };
 
 // Spontaneous thoughts timer checker
@@ -568,13 +667,15 @@ function checkInactivityForThought() {
 }
 
 function triggerLocalThought() {
-    const pool = LOCAL_THOUGHTS[state.personality] || LOCAL_THOUGHTS.normal;
+    const typePool = LOCAL_THOUGHTS[state.petType] || LOCAL_THOUGHTS.shiba;
+    const pool = typePool[state.personality] || typePool.normal;
     const text = pool[Math.floor(Math.random() * pool.length)];
     showThoughtBubble(text);
 }
 
 async function triggerSpontaneousThought() {
-    const prompt = `現在のステータスとあなたの性格を考慮して、ふと考えたことや今したいことを、犬（${petName}）としての可愛い独り言（1文、5文字以内）でつぶやいてください。`;
+    const petTypeJA = getPetTypeJA();
+    const prompt = `現在のステータスとあなたの性格を考慮して、ふと考えたことや今したいことを、${petTypeJA}（${petName}）としての可愛い独り言（1文、5文字以内）でつぶやいてください。`;
     
     incrementApiCount();
     const response = await getGeminiResponse(prompt, true);
@@ -648,6 +749,174 @@ async function submitMessage(text) {
     }
 }
 
+const LOCAL_CHAT_RESPONSES = {
+    shiba: {
+        paw: 'お手だワン！ほら、できたワン！🐾',
+        sit: 'お座りして待つワン！おやつある？骨投げしてほしいワン！🦴',
+        sleep: 'ふにゃあ…おやすみワン。良い夢見るワン…💤',
+        love: 'えへへ、なでなで大好きだワン！もっと撫でてワン！💖',
+        name: `ぼくの名前は「\${petName}」だワン！かっこいい名前で嬉しいワン！🐶`,
+        default: {
+            normal: [
+                'ワンワン！今日も一緒にいられて嬉しいワン！',
+                'クーン…何かおもしろいことないワン？',
+                'ジー…飼い主さんのこと、じっと見つめてるワン。',
+                'お腹すいたワン！おやつかご飯ほしいワン！'
+            ],
+            energetic: [
+                'ワンッ！！もっと走りたいワン！あそぼー！！',
+                'ルンルン！お外に散歩に行きたいワン！！🐾',
+                'テンションMAXだワン！飛び跳ねちゃうワン！',
+                'わーい！楽しいこといっぱいで幸せワン！'
+            ],
+            lazy: [
+                'ふにゃあ…なんだか、とっても眠いワン…💤',
+                'のんびり、ごろごろするのが一番だワン…',
+                'むにゃむにゃ…お昼寝の邪魔はしないでワン…',
+                'ワン…あ、あくびが出ちゃったワン…ふぁあ'
+            ],
+            glutton: [
+                'クーン…美味しそうなにおいがするワン！🍖',
+                'おやつ！おやつどこワン！？早くほしいワン！',
+                'モグモグ…もっといっぱい食べたいワン！',
+                'ご飯の時間が一番大好きなんだワン！ヨダレが出ちゃうワン…'
+            ]
+        }
+    },
+    poodle: {
+        paw: 'お手プー！できたプー！褒めて褒めてワン！🐾',
+        sit: 'お座りだプー！おやつくれる？ワクワクワン！🦴',
+        sleep: 'クゥーン…おやすみプー。抱っこして寝てほしいプー…💤',
+        love: 'キャッキャッ！なでなでもっと！大好きだプー！💖',
+        name: `ぼくの名前は「\${petName}」プー！とっても可愛い名前プー！🐶`,
+        default: {
+            normal: [
+                '遊ぼう！遊ぼう！なでなでしてプー！🐾',
+                '甘えん坊モードだプー！ずっとそばにいてワン！',
+                'クゥーン…どこ行くの？置いていかないでプー！',
+                'お腹すいたワン！美味しいクッキーほしいプー！'
+            ],
+            energetic: [
+                'わーい！遊ぶプー！いっぱい走り回るプー！💨',
+                'トイプーパワー大爆発だワン！元気いっぱいプー！',
+                'ルンルン！お出かけ？お出かけするのプー！？',
+                '嬉しすぎてしっぽがちぎれちゃうプー！'
+            ],
+            lazy: [
+                'フニャ…抱っこしててほしいプー…💤',
+                'ひざの上でとろんとしちゃうプー…',
+                'お昼寝タイムだワン。なでなでしながら寝てプー…',
+                'ふわぁ…眠たいプー。おやすみワン'
+            ],
+            glutton: [
+                '美味しいおやつ！おやつプー！早くちょうだいワン！',
+                'クンクン…ごはんの準備？いい匂いがするプー！🍖',
+                'もぐもぐ…もっと美味しいものないのプー？',
+                'お腹空いちゃったワン！何か食べるプー！'
+            ]
+        }
+    },
+    bulldog: {
+        paw: 'フガッ、お手だぜ！どうだ、かっこいいだろ？🐾',
+        sit: 'お座りだぜ。フガフガ…ご褒美あるよな？🦴',
+        sleep: 'グォー…おやすみだぜ。いびきかいちゃうかもだぜ…💤',
+        love: 'フガッ、照れるぜ。なでな後は悪くないぜ…💖',
+        name: `オレの名前は「\${petName}」だぜ！力強くていい名前だぜ！🐶`,
+        default: {
+            normal: [
+                'バウバウ！オレも一緒にいて楽しいぜ！',
+                'フガ…何かうまいもん食おうぜ。',
+                'ジー…飼い主のこと、守ってやるぜ！',
+                'お腹減ったぜ。ガッツリ食べたい気分だぜ！'
+            ],
+            energetic: [
+                'バウバウ！走るぜ！相棒、ついてこいよな！🐾',
+                'フンフン！やる気満々だぜ！遊ぼうぜ！',
+                'テンション上がってきたぜ！バウ！バウ！',
+                'よっしゃー！楽しいことが一番だぜ！'
+            ],
+            lazy: [
+                'ふぅ、ちょっと休憩だぜ。動くのめんどいぜ…💤',
+                'ごろごろするのが至福の時間だぜ…',
+                'フゴフゴ…お昼寝の邪魔はすんなよな…',
+                'ふぁあ、眠いぜ。オレはここで寝るぜ'
+            ],
+            glutton: [
+                'フガフガ…肉！肉のにおいがするぜ！🍖',
+                '飯だ！飯の時間だぜ！大盛りで頼むぜ！',
+                'ガツガツ…食うのが生きがいだぜ！',
+                'まだまだ腹減ってるぜ。おかわりはないのか？'
+            ]
+        }
+    },
+    cat: {
+        paw: 'にゃー、お手だにゃ！ほら、できたにゃん🐾',
+        sit: 'お座りにゃ。気が向いたから待ってあげるにゃん🐾',
+        sleep: 'ふにゃあ…おやすみにゃ。毛布をかけてにゃん…💤',
+        love: 'ゴロゴロ…なでなで気持ちいいにゃ〜。もっと撫でるにゃ！💖',
+        name: `私の名前は「\${petName}」にゃ！お上品で素敵にゃん！🐱`,
+        default: {
+            normal: [
+                'ニャーオ。今日も気まぐれに付き合ってあげるにゃ。',
+                'ゴロゴロ…喉を鳴らして甘えてみるにゃん。',
+                'ジー…何してるにゃ？気になるにゃ。',
+                'お腹すいたにゃ。高級なキャットフードがいいにゃ！'
+            ],
+            energetic: [
+                'ニャッ！おもちゃだにゃ！捕まえるにゃ！🐾',
+                '部屋中を大激走するにゃ！止められないにゃ！',
+                'パタパタ動くもの、全部ロックオンにゃ！',
+                '遊ぼうにゃ！おもちゃ投げてにゃん！'
+            ],
+            lazy: [
+                'ふにゃあ…眠いにゃ。そっとしておいてにゃ…💤',
+                'こたつか日向で一日中寝たいにゃ…',
+                'むにゃむにゃ…邪魔しないでにゃ…',
+                'ふわぁ…あくびが出ちゃったにゃ。おやすみ'
+            ],
+            glutton: [
+                'クンクン…美味しそうなマグロのにおいがするにゃ！🐟',
+                'ちゅーる！ちゅーるほしいにゃ！早くにゃ！',
+                'モグモグ…美味しいにゃ。おかわり要求にゃ！',
+                'ご飯をくれるなら、ちょっとだけ撫でさせてあげるにゃ。'
+            ]
+        }
+    },
+    parrot: {
+        paw: 'パタパタ！お手！できたよ！褒めて！🦜',
+        sit: 'お座り！待て！じっとしてるよ！🦴',
+        sleep: 'ウトウト…おやすみオウム…静かにしてね…💤',
+        love: 'ハロー！なでなで大好き！もっとパタパタ！💖',
+        name: `ボクの名前は「\${petName}」！オウム！素敵な名前だね！🦜`,
+        default: {
+            normal: [
+                'ハロー！ハロー！おしゃべりしよう！',
+                'パタパタ…オウムだよ！元気？',
+                'ジー…飼い主さんの顔、よく見えるよ！',
+                'タネ！ヒマワリのタネが食べたいな！'
+            ],
+            energetic: [
+                'パタパタパタ！飛んじゃうよ！元気いっぱい！💨',
+                'オウムパワー全開！ワッハッハ！遊ぼう！',
+                '楽しいね！お話しするの、とっても楽しいね！',
+                'ピーピー！テンションマックスだよ！'
+            ],
+            lazy: [
+                'ふぅ…ちょっと休憩オウム…💤',
+                'ウトウト…お昼寝タイムかな？',
+                'のんびり羽づくろいするよ。静かにね。',
+                'ふわぁ…あくびオウム…眠いな'
+            ],
+            glutton: [
+                'ご飯！美味しいくだものちょうだい！🍎',
+                'モグモグ…おかわり！おかわりほしいオウム！',
+                'タネ！タネどこ？いっぱい食べたいな！',
+                '食べるの大好き！お腹ペコペコだよ！'
+            ]
+        }
+    }
+};
+
 // Local offline fallback response engine
 function submitLocalMessage(text) {
     thinkingIndicator.classList.remove('hidden');
@@ -659,60 +928,38 @@ function submitLocalMessage(text) {
         let animation = 'idle';
         
         const cleanText = text.toLowerCase();
+        const typePool = LOCAL_CHAT_RESPONSES[state.petType] || LOCAL_CHAT_RESPONSES.shiba;
         
         // Keyword checks
         if (cleanText.includes('お手') || cleanText.includes('おて')) {
             animation = 'paw';
-            reply = 'お手だワン！ほら、できたワン！🐾';
+            reply = typePool.paw;
         } else if (cleanText.includes('お座り') || cleanText.includes('おすわり') || cleanText.includes('待て') || cleanText.includes('まて')) {
             animation = 'sit';
-            reply = 'お座りして待つワン！おやつある？🦴';
+            reply = typePool.sit;
         } else if (cleanText.includes('骨') || cleanText.includes('投げ') || cleanText.includes('ボール') || cleanText.includes('もってきて')) {
-            // Trigger fetch animation
             throwBoneAction();
             return;
         } else if (cleanText.includes('寝る') || cleanText.includes('おやすみ') || cleanText.includes('眠')) {
             animation = 'sleep';
             if (!state.isSleeping) toggleSleep();
-            reply = 'ふにゃあ…おやすみワン。良い夢見るワン…💤';
+            reply = typePool.sleep;
         } else if (cleanText.includes('なでなで') || cleanText.includes('可愛い') || cleanText.includes('かわいい') || cleanText.includes('好き')) {
             animation = 'happy';
-            reply = 'えへへ、なでなで大好きだワン！もっと撫でてワン！💖';
+            reply = typePool.love;
         } else if (cleanText.includes('名前')) {
             animation = 'happy';
-            reply = `ぼくの名前は「${petName}」だワン！かっこいい名前で嬉しいワン！🐶`;
+            reply = typePool.name;
         } else {
-            // Personality-based standard responses
-            const pPool = {
-                normal: [
-                    'ワンワン！今日も一緒にいられて嬉しいワン！',
-                    'クーン…何かおもしろいことないワン？',
-                    'ジー…飼い主さんのこと、じっと見つめてるワン。',
-                    'お腹すいたワン！おやつかご飯ほしいワン！'
-                ],
-                energetic: [
-                    'ワンッ！！もっと走りたいワン！あそぼー！！',
-                    'ルンルン！お外に散歩に行きたいワン！！🐾',
-                    'テンションMAXだワン！飛び跳ねちゃうワン！',
-                    'わーい！楽しいこといっぱいで幸せワン！'
-                ],
-                lazy: [
-                    'ふにゃあ…なんだか、とっても眠いワン…💤',
-                    'のんびり、ごろごろするのが一番だワン…',
-                    'むにゃむにゃ…お昼寝の邪魔はしないでワン…',
-                    'ワン…あ、あくびが出ちゃったワン…ふぁあ'
-                ],
-                glutton: [
-                    'クーン…美味しそうなにおいがするワン！🍖',
-                    'おやつ！おやつどこワン！？早くほしいワン！',
-                    'モグモグ…もっといっぱい食べたいワン！',
-                    'ご飯の時間が一番大好きなんだワン！ヨダレが出ちゃうワン…'
-                ]
-            };
-            
-            const pool = pPool[state.personality] || pPool.normal;
-            reply = pool[Math.floor(Math.random() * pool.length)];
-            animation = Math.random() > 0.5 ? 'happy' : 'idle';
+            // Parrot mimicking feature! If it's a parrot, occasionally mimic user words
+            if (state.petType === 'parrot' && Math.random() < 0.4) {
+                reply = `「${text}」！${text}！オウム真似っこ！🦜`;
+                animation = 'happy';
+            } else {
+                const pool = typePool.default[state.personality] || typePool.default.normal;
+                reply = pool[Math.floor(Math.random() * pool.length)];
+                animation = Math.random() > 0.5 ? 'happy' : 'idle';
+            }
         }
         
         appendChatMessage('pet', reply);
@@ -727,8 +974,18 @@ function submitLocalMessage(text) {
 async function submitMessageSilent(hiddenSystemPrompt) {
     if (!apiKey || useLocalMode || !isApiQuotaOk()) {
         // Safe offline response for silent calls (e.g. bone fetched)
-        appendChatMessage('pet', `ワンワンッ！骨を取ってきたワン！うれしいワン！🐾`);
-        speakText('ワンワンッ！骨を取ってきたワン！うれしいワン！');
+        let boneReply = `ワンワンッ！骨を取ってきたワン！うれしいワン！🐾`;
+        if (state.petType === 'cat') {
+            boneReply = `にゃおん！骨を取ってきたにゃ！遊んでくれて嬉しいにゃ！🐾`;
+        } else if (state.petType === 'parrot') {
+            boneReply = `パタパタ！骨！持ってきたオウム！楽しいね！🦜`;
+        } else if (state.petType === 'poodle') {
+            boneReply = `キャッキャッ！骨を持ってきたプー！嬉しいプー！🐾`;
+        } else if (state.petType === 'bulldog') {
+            boneReply = `フガッ！骨を取ってきたぜ！もっと投げてくれぜ！🐾`;
+        }
+        appendChatMessage('pet', boneReply);
+        speakText(boneReply);
         return;
     }
     
@@ -800,8 +1057,24 @@ async function getGeminiResponse(userPrompt, isThought = false) {
     // Debounce: if a request is already in flight, skip spontaneous thoughts
     if (pendingRequest && isThought) return null;
 
-    const sysPrompt = `あなたは「${petName}」という名前の3Dバーチャルペット（犬）です。飼い主と日本語で自然に会話してください。
-返答は「ワン！」「〜だワン」などの犬らしい表現を交えて1〜3文で簡潔に。
+    let petTypeJA = "柴犬";
+    let speechStyle = "返答は「ワン！」「〜だワン」などの犬らしい表現を交えて1〜3文で簡潔に。";
+    if (state.petType === 'cat') {
+        petTypeJA = "猫";
+        speechStyle = "返答は「ニャー」「〜だニャン」「〜だにゃ」などの可愛い猫らしい表現を交えて1〜3文で簡潔に。";
+    } else if (state.petType === 'parrot') {
+        petTypeJA = "オウム";
+        speechStyle = "返答は「ハロー！」「パタパタ」「〜だオウム」「〜だよ！」などの少し片言で鳥らしくお茶目で可愛い表現、あるいは時々飼い主の言葉を繰り返す表現を交えて1〜3文で簡潔に。";
+    } else if (state.petType === 'poodle') {
+        petTypeJA = "トイプードル";
+        speechStyle = "返答は「クゥーン」「〜だプー」「〜ワン」などの非常に甘えん坊で愛らしいトイプードルらしい表現を交えて1〜3文で簡潔に。";
+    } else if (state.petType === 'bulldog') {
+        petTypeJA = "ブルドッグ";
+        speechStyle = "返答は「バウバウ」「〜だぜ」「〜だワン」などの少しのんびり、または少し強気で愛嬌のあるブルドッグらしい表現を交えて1〜3文で簡潔に。";
+    }
+
+    const sysPrompt = `あなたは「${petName}」という名前の3Dバーチャルペット（${petTypeJA}）です。飼い主と日本語で自然に会話してください。
+${speechStyle}
 
 ステータス: Hunger=${state.hunger}/100, Happiness=${state.happiness}/100, Energy=${state.energy}/100, Sleeping=${state.isSleeping}
 性格: ${state.personality} (normal=普通, energetic=ハイテンション!, lazy=のんびり…, glutton=食いしん坊)
@@ -930,15 +1203,34 @@ function speakText(text) {
     let pitch = 1.3;
     let rate = 1.15;
     
-    if (state.personality === 'energetic') {
-        pitch = 1.5;
-        rate = 1.3;
-    } else if (state.personality === 'lazy') {
-        pitch = 0.95;
-        rate = 0.85;
-    } else if (state.personality === 'glutton') {
-        pitch = 1.2;
+    // Animal base offsets
+    if (state.petType === 'shiba') {
+        pitch = 1.3;
         rate = 1.1;
+    } else if (state.petType === 'poodle') {
+        pitch = 1.6; // Higher pitched
+        rate = 1.25; // Faster, energetic
+    } else if (state.petType === 'bulldog') {
+        pitch = 0.8; // Lower, gruff
+        rate = 0.95; // Slightly slower
+    } else if (state.petType === 'cat') {
+        pitch = 1.5; // High, sweet
+        rate = 1.15;
+    } else if (state.petType === 'parrot') {
+        pitch = 1.8; // Very high and squeaky
+        rate = 1.3;  // Fast chatter
+    }
+    
+    // Modify based on personality
+    if (state.personality === 'energetic') {
+        pitch += 0.2;
+        rate *= 1.15;
+    } else if (state.personality === 'lazy') {
+        pitch -= 0.15;
+        rate *= 0.8;
+    } else if (state.personality === 'glutton') {
+        pitch -= 0.05;
+        rate *= 1.0;
     }
     
     utterance.pitch = pitch;
