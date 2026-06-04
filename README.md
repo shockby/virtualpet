@@ -86,3 +86,13 @@ npx wrangler pages deploy .
 - **AI Integration**: Google Generative AI (Gemini API v1beta)
 - **Voice Control**: Web Speech API (SpeechRecognition & SpeechSynthesis)
 - **Platform**: Cloudflare Pages / Wrangler
+
+
+# 3D Dog Model Credit
+
+- Shiba Inu by Quaternius (https://poly.pizza/m/y4wdQpg767)
+- Beagle by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/0BnDT3T1wTE)
+- Poodle by jeremy [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/2ig2NlSneau)
+- Pug by Workshop apelab [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/f1YBNg2R0nj)
+- Kitten by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/dBJgGEu5bHW)
+- Parrot by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/35EeLqGHH1y)
