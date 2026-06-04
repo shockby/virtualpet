@@ -266,7 +266,7 @@ window.setPetType = function (type) {
         // Model transformation parameters hand-tuned for visual excellence
         const configs = {
             shiba:   { scale: 2.2,  x: 0, y: -1.1,  z: 0, rotY: 0 },
-            poodle:  { scale: 0.35, x: 0, y: -1.1,  z: 0, rotY: 0 },
+            poodle:  { scale: 0.35, x: 0, y: -1.3,  z: 0, rotY: 0 },
             pug:     { scale: 13.2, x: 0, y: -0.9,  z: 0, rotY: 0 },
             beagle:  { scale: 0.072,x: 0, y: -0.9,  z: 0, rotY: 0 },
             cat:     { scale: 0.16, x: 0, y: -0.9,  z: 0, rotY: 0 }, // rotY = 0 is facing forward for new kitten
