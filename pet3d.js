@@ -231,17 +231,19 @@ window.setPetType = function (type) {
     let glbPath = '';
     const cacheBuster = '?v=' + Date.now();
     if (type === 'shiba') {
-        glbPath = '/assets/shiba.glb' + cacheBuster;
+        glbPath = '/assets/ShibaInu.glb' + cacheBuster;
     } else if (type === 'poodle') {
-        glbPath = '/assets/shiba.glb' + cacheBuster; // Poodle uses recolored Shiba as high-quality fallback
-    } else if (type === 'bulldog') {
-        glbPath = '/assets/bulldog.glb' + cacheBuster;
+        glbPath = '/assets/Poodle.glb' + cacheBuster;
+    } else if (type === 'pug') {
+        glbPath = '/assets/Pug.glb' + cacheBuster;
+    } else if (type === 'beagle') {
+        glbPath = '/assets/Beagle.glb' + cacheBuster;
     } else if (type === 'cat') {
-        glbPath = '/assets/cat.glb' + cacheBuster;
+        glbPath = '/assets/Kitten.glb' + cacheBuster;
     } else if (type === 'parrot') {
-        glbPath = '/assets/parrot.glb' + cacheBuster;
+        glbPath = '/assets/Parrot.glb' + cacheBuster;
     } else {
-        glbPath = '/assets/shiba.glb' + cacheBuster;
+        glbPath = '/assets/ShibaInu.glb' + cacheBuster;
     }
 
     loader.load(glbPath, function (gltf) {
@@ -258,26 +260,17 @@ window.setPetType = function (type) {
             if (node.isMesh) {
                 node.castShadow = true;
                 node.receiveShadow = true;
-
-                // Color adjustments for Poodle
-                if (type === 'poodle') {
-                    node.material = new THREE.MeshPhysicalMaterial({
-                        color: 0xa26c48, // Teddy Bear Apricot Brown
-                        roughness: 0.85,
-                        metalness: 0.05,
-                        sheen: new THREE.Color(0xffffff).lerp(new THREE.Color(0xa26c48), 0.3)
-                    });
-                }
             }
         });
 
         // Model transformation parameters hand-tuned for visual excellence
         const configs = {
-            shiba:   { scale: 2.8,  x: 0, y: 1.91,  z: 1.46, rotY: 0 },
-            poodle:  { scale: 2.8,  x: 0, y: 1.91,  z: 1.46, rotY: 0 },
-            bulldog: { scale: 3.6,  x: 0, y: -0.85, z: 0.12, rotY: 0 },
-            cat:     { scale: 0.22, x: 0, y: -0.88, z: 0.65, rotY: Math.PI }, // rotY = Math.PI is facing forward for cat
-            parrot:  { scale: 0.07, x: 0, y: 4.83,  z: 1.81, rotY: -Math.PI / 2 }
+            shiba:   { scale: 2.2,  x: 0, y: -1.1,  z: 0, rotY: 0 },
+            poodle:  { scale: 0.35, x: 0, y: -1.1,  z: 0, rotY: 0 },
+            pug:     { scale: 13.2, x: 0, y: -0.9,  z: 0, rotY: 0 },
+            beagle:  { scale: 0.072,x: 0, y: -0.9,  z: 0, rotY: 0 },
+            cat:     { scale: 0.16, x: 0, y: -0.9,  z: 0, rotY: 0 }, // rotY = 0 is facing forward for new kitten
+            parrot:  { scale: 0.54, x: 0, y: -0.9,  z: 0, rotY: 0 }
         };
 
         const config = configs[type] || configs.shiba;

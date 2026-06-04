@@ -163,8 +163,10 @@ function init() {
                 changeReply = "ハロー！オウムに変身！パタパタパタ！🦜";
             } else if (state.petType === 'poodle') {
                 changeReply = "クゥーン！トイプードルに変身したプー！よろしくワン🐾";
-            } else if (state.petType === 'bulldog') {
-                changeReply = "バウバウ！ブルドッグに変身したぜ！よろしくな！🐾";
+            } else if (state.petType === 'pug') {
+                changeReply = "バウバウ！パグに変身したぜ！よろしくな！🐾";
+            } else if (state.petType === 'beagle') {
+                changeReply = "ワンワン！ビーグルに変身したワン！よろしくワン！🐾";
             } else {
                 changeReply = "ワン！柴犬に変身したワン！よろしくワン！🐾";
             }
@@ -232,9 +234,12 @@ function init() {
             } else if (state.petType === 'poodle') {
                 thankReply = `キャッ！新しい名前「${petName}」にしてくれてありがとうプー！🐾`;
                 thankSpeech = `新しい名前、${petName}にしてくれてありがとうプー！`;
-            } else if (state.petType === 'bulldog') {
+            } else if (state.petType === 'pug') {
                 thankReply = `フガッ！新しい名前「${petName}」にしてくれてありがとうだぜ！🐾`;
                 thankSpeech = `新しい名前、${petName}にしてくれてありがとうだぜ！`;
+            } else if (state.petType === 'beagle') {
+                thankReply = `バウッ！新しい名前「${petName}」にしてくれてありがとうだワン！🐾`;
+                thankSpeech = `新しい名前、${petName}にしてくれてありがとうだワン！`;
             }
             appendChatMessage('pet', thankReply);
             speakText(thankSpeech);
@@ -565,7 +570,8 @@ function getWelcomeText(type) {
     if (type === 'cat') return "ニャーオ！私とお話しするにゃ？🐾";
     if (type === 'parrot') return "ハロー！ハロー！ボクとお話ししよう！🦜";
     if (type === 'poodle') return "クゥーン！ぼくとお話しするプー？🐾";
-    if (type === 'bulldog') return "バウバウ！オレとお話ししようぜ！🐾";
+    if (type === 'pug') return "バウバウ！オレとお話ししようぜ！🐾";
+    if (type === 'beagle') return "ワンワン！ぼくとお話ししようワン！🐾";
     return "ワンワン！ぼくとお話ししようワン！🐾";
 }
 
@@ -573,7 +579,8 @@ function getPetTypeJA() {
     if (state.petType === 'cat') return '猫';
     if (state.petType === 'parrot') return 'オウム';
     if (state.petType === 'poodle') return 'トイプードル';
-    if (state.petType === 'bulldog') return 'ブルドッグ';
+    if (state.petType === 'pug') return 'パグ';
+    if (state.petType === 'beagle') return 'ビーグル';
     return '柴犬';
 }
 
@@ -631,11 +638,17 @@ const LOCAL_THOUGHTS = {
         lazy:      ['うにゃあ…ねむねむプー…', 'だらだらするプー…', '抱っこしてワン…'],
         glutton:  ['おいしいおやつまだプー？', 'お腹ぺこぺこだワン！', 'もぐもぐしたいプー！']
     },
-    bulldog: {
+    pug: {
         normal:   ['のんびりいこうぜ。', 'バウ！遊ぶか？', 'フガフガ…良い天気だぜ。'],
         energetic: ['バウバウ！走るぜ！相棒、ついてこいよな！🐾', 'フゴフゴ！絶好調だぜ！🐾', '楽しいぜ！'],
         lazy:      ['ふぅ…動くのめんどいぜ…', '寝るのが一番だぜ…', 'フガ…あくびが出るぜ…'],
         glutton:  ['肉！肉をくれだぜ！🍖', 'フガフガ…いい匂いがするぜ！', '腹減ったぜ…']
+    },
+    beagle: {
+        normal:   ['くんくん、何か匂うワン。', '遊ぶの大好きだワン！', 'お散歩まだかな〜ワン'],
+        energetic: ['バウバウ！走り回るワン！💨', '元気いっぱいだワン！一緒に遊ぼう！', '絶好調ワン！'],
+        lazy:      ['ふぁあ…眠いワン💤', 'のんびり日向ぼっこワン。', 'お昼寝タイムワン〜'],
+        glutton:  ['お腹すいたワン！おやつちょうだい！', 'もぐもぐしたいワン…🍖', '美味しい匂いワン！']
     },
     cat: {
         normal:   ['ニャーオ、遊ぶにゃ？', 'ゴロゴロ…撫でてにゃ。', '日向ぼっこするにゃ〜'],
@@ -823,7 +836,7 @@ const LOCAL_CHAT_RESPONSES = {
             ]
         }
     },
-    bulldog: {
+    pug: {
         paw: 'フガッ、お手だぜ！どうだ、かっこいいだろ？🐾',
         sit: 'お座りだぜ。フガフガ…ご褒美あるよな？🦴',
         sleep: 'グォー…おやすみだぜ。いびきかいちゃうかもだぜ…💤',
@@ -853,6 +866,39 @@ const LOCAL_CHAT_RESPONSES = {
                 '飯だ！飯の時間だぜ！大盛りで頼むぜ！',
                 'ガツガツ…食うのが生きがいだぜ！',
                 'まだまだ腹減ってるぜ。おかわりはないのか？'
+            ]
+        }
+    },
+    beagle: {
+        paw: 'バウッ、お手だワン！褒めてワン！🐾',
+        sit: 'お座りだワン！おやつ待ってるワン！🦴',
+        sleep: 'クーン…おやすみワン。また明日遊んでワン…💤',
+        love: 'ハッピーワン！なでなでもっと撫でてワン！💖',
+        name: `ぼくの名前は「\${petName}」だワン！かっこいい名前だワン！🐶`,
+        default: {
+            normal: [
+                'ワンワン！一緒に遊ぶと楽しいワン！',
+                'くんくん…どこからか美味しい匂いがするワン！',
+                'じーっ…遊んでほしそうに見つめてるワン。',
+                'お腹すいたワン！何か食べたいワン！'
+            ],
+            energetic: [
+                'バウバウ！思いっきり走りたいワン！🐾',
+                'テンション上がってきたワン！もっと遊ぶワン！',
+                '元気全開だワン！パタパタ走るワン！',
+                'わーい！楽しいワン！飛び跳ねちゃうワン！'
+            ],
+            lazy: [
+                'ふぅ…ちょっと眠くなってきたワン💤',
+                'ごろごろするのが大好きワン。',
+                'むにゃむにゃ…いい夢見てるワン…',
+                'ふわぁ、おやすみワン…'
+            ],
+            glutton: [
+                'おやつ！おやつが食べたいワン！🍖',
+                'お腹ペコペコワン！ご飯まだワン？',
+                'バクバク！食べるのが大好きだワン！',
+                'おかわり！おかわりほしいワン！'
             ]
         }
     },
@@ -988,8 +1034,10 @@ async function submitMessageSilent(hiddenSystemPrompt) {
             boneReply = `パタパタ！骨！持ってきたオウム！楽しいね！🦜`;
         } else if (state.petType === 'poodle') {
             boneReply = `キャッキャッ！骨を持ってきたプー！嬉しいプー！🐾`;
-        } else if (state.petType === 'bulldog') {
+        } else if (state.petType === 'pug') {
             boneReply = `フガッ！骨を取ってきたぜ！もっと投げてくれぜ！🐾`;
+        } else if (state.petType === 'beagle') {
+            boneReply = `バウッ！骨を持ってきたワン！うれしいワン！🐾`;
         }
         appendChatMessage('pet', boneReply);
         speakText(boneReply);
@@ -1075,9 +1123,12 @@ async function getGeminiResponse(userPrompt, isThought = false) {
     } else if (state.petType === 'poodle') {
         petTypeJA = "トイプードル";
         speechStyle = "返答は「クゥーン」「〜だプー」「〜ワン」などの非常に甘えん坊で愛らしいトイプードルらしい表現を交えて1〜3文で簡潔に。";
-    } else if (state.petType === 'bulldog') {
-        petTypeJA = "ブルドッグ";
-        speechStyle = "返答は「バウバウ」「〜だぜ」「〜だワン」などの少しのんびり、または少し強気で愛嬌のあるブルドッグらしい表現を交えて1〜3文で簡潔に。";
+    } else if (state.petType === 'pug') {
+        petTypeJA = "パグ";
+        speechStyle = "返答は「フガフガ」「〜だぜ」「〜だワン」などの少しのんびり、または少し強気で愛嬌のあるパグらしい表現を交えて1〜3文で簡潔に。";
+    } else if (state.petType === 'beagle') {
+        petTypeJA = "ビーグル";
+        speechStyle = "返答は「バウッ！」「〜だワン」などの元気で活発なビーグルらしい表現を交えて1〜3文で簡潔に。";
     }
 
     const sysPrompt = `あなたは「${petName}」という名前の3Dバーチャルペット（${petTypeJA}）です。飼い主と日本語で自然に会話してください。
@@ -1219,9 +1270,12 @@ function speakText(text) {
     } else if (state.petType === 'poodle') {
         pitch = 1.6; // Higher pitched
         rate = 1.25; // Faster, energetic
-    } else if (state.petType === 'bulldog') {
+    } else if (state.petType === 'pug') {
         pitch = 0.8; // Lower, gruff
         rate = 0.95; // Slightly slower
+    } else if (state.petType === 'beagle') {
+        pitch = 1.25; // Playful, clear
+        rate = 1.15;
     } else if (state.petType === 'cat') {
         pitch = 1.5; // High, sweet
         rate = 1.15;
@@ -1270,7 +1324,7 @@ function updateQuickPrompts() {
             { text: '🦜 飛んでみて！', prompt: '飛んでみて！' }
         ];
     } else {
-        // Dogs (Shiba, Poodle, Bulldog)
+        // Dogs (Shiba, Poodle, Pug, Beagle)
         prompts = [
             { text: '👋 お手！', prompt: 'お手！' },
             { text: '✨ 待て！', prompt: '待て！' },
