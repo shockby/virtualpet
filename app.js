@@ -45,7 +45,6 @@ const btnClosePersonality = document.getElementById('btn-close-personality');
 
 // Name Input elements
 const inputPetName = document.getElementById('input-pet-name');
-const btnSaveName = document.getElementById('btn-save-name');
 const selectPetType = document.getElementById('select-pet-type');
 
 // Constants
@@ -192,33 +191,9 @@ function init() {
         modalCare.classList.add('hidden');
     });
     
-    btnClosePersonality.addEventListener('click', () => {
-        modalPersonality.classList.add('hidden');
-    });
-    
-    // Light dismiss clicks (close overlay if clicking backdrop)
-    modalCare.addEventListener('click', (e) => {
-        if (e.target === modalCare) {
-            modalCare.classList.add('hidden');
-        }
-    });
-    
-    modalPersonality.addEventListener('click', (e) => {
-        if (e.target === modalPersonality) {
-            modalPersonality.classList.add('hidden');
-        }
-    });
-
-    // Sliders Event Listeners
-    setupSlider(sliderBody, valBody, 'body');
-    setupSlider(sliderHead, valHead, 'head');
-    setupSlider(sliderEars, valEars, 'ears');
-    setupSlider(sliderLegs, valLegs, 'legs');
-
-    // Pet Name Saving Listener
-    btnSaveName.addEventListener('click', () => {
+    function savePetName() {
         const name = inputPetName.value.trim();
-        if (name) {
+        if (name && name !== petName) {
             petName = name;
             localStorage.setItem('pet_name', petName);
             updatePetNameUI();
@@ -243,14 +218,34 @@ function init() {
             }
             appendChatMessage('pet', thankReply);
             speakText(thankSpeech);
-            
-            // Auto close modal to show title transition
-            setTimeout(() => {
-                modalPersonality.classList.add('hidden');
-            }, 1200);
         }
         resetInactivityTimer();
+    }
+
+    btnClosePersonality.addEventListener('click', () => {
+        savePetName();
+        modalPersonality.classList.add('hidden');
     });
+    
+    // Light dismiss clicks (close overlay if clicking backdrop)
+    modalCare.addEventListener('click', (e) => {
+        if (e.target === modalCare) {
+            modalCare.classList.add('hidden');
+        }
+    });
+    
+    modalPersonality.addEventListener('click', (e) => {
+        if (e.target === modalPersonality) {
+            savePetName();
+            modalPersonality.classList.add('hidden');
+        }
+    });
+
+    // Sliders Event Listeners
+    setupSlider(sliderBody, valBody, 'body');
+    setupSlider(sliderHead, valHead, 'head');
+    setupSlider(sliderEars, valEars, 'ears');
+    setupSlider(sliderLegs, valLegs, 'legs');
 
     // AI Chat Panel Event Listeners
     btnToggleKey.addEventListener('click', () => {
@@ -738,6 +733,11 @@ async function submitMessage(text) {
     thinkingIndicator.classList.remove('hidden');
     chatLog.scrollTop = chatLog.scrollHeight;
 
+    // 先行リアクション：送信直後にペットが話を聞くアニメーション（お座り）を開始
+    if (window.setDogAnimation && !state.isSleeping) {
+        window.setDogAnimation('sit');
+    }
+
     incrementApiCount();
     const response = await getGeminiResponse(text);
     
@@ -1017,11 +1017,10 @@ function submitLocalMessage(text) {
         
         appendChatMessage('pet', reply);
         speakText(reply);
-        
         if (window.setDogAnimation) {
             window.setDogAnimation(animation);
         }
-    }, 600);
+    }, 100);
 }
 
 async function submitMessageSilent(hiddenSystemPrompt) {
@@ -1086,8 +1085,8 @@ function applyShapeChanges(shape) {
 
 // Model fallback chain for free tier quota management
 const GEMINI_MODELS = [
-    'gemini-3.5-flash',        // Latest GA Flash model (smart, fast)
     'gemini-3.1-flash-lite',   // High-volume, low-latency lite model
+    'gemini-3.5-flash',        // Latest GA Flash model (smart, fast)
     'gemini-2.5-flash',        // Stable fallback Flash model
 ];
 
@@ -1156,6 +1155,7 @@ ${speechStyle}
         },
         generationConfig: {
             responseMimeType: "application/json",
+            maxOutputTokens: 150,
             responseSchema: {
                 type: "OBJECT",
                 properties: {
