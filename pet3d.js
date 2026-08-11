@@ -204,7 +204,7 @@ window.setPetType = function (type) {
 
         // Model transformation parameters hand-tuned for visual excellence
         const configs = {
-            shiba:    { scale: 2.2,   x: 0, y: -1.1,  z: 0, rotY: 0 },
+            shiba:    { scale: 0.026, x: 0, y: -0.9,  z: 0, rotY: 0 },
             baby_dog: { scale: 0.026, x: 0, y: -0.9,  z: 0, rotY: 0 },
             poodle:   { scale: 0.35,  x: 0, y: -1.3,  z: 0, rotY: 0 },
             pug:      { scale: 13.2,  x: 0, y: -0.9,  z: 0, rotY: 0 },
@@ -407,26 +407,30 @@ window.setDogAnimation = function (animName) {
     targetRotations.legBL.copy(defaultRotations.legBL);
     targetRotations.legBR.copy(defaultRotations.legBR);
 
-    // Handle embedded AnimationClip cross-fading if present (e.g. Baby Dog or Parrot)
+    // Helper to find action by partial keyword matching
+    function getActionByName(keyword) {
+        const keys = Object.keys(activeActions);
+        const foundKey = keys.find(k => k.toLowerCase().includes(keyword.toLowerCase()));
+        return foundKey ? activeActions[foundKey] : null;
+    }
+
+    // Handle embedded AnimationClip cross-fading if present (e.g. Shiba Inu, Baby Dog, or Parrot)
     if (activeMixer && Object.keys(activeActions).length > 0) {
-        let targetClipName = Object.keys(activeActions)[0]; // Default fallback clip
+        let targetAction = activeActions[Object.keys(activeActions)[0]]; // Default fallback clip
 
-        if (animName === 'sit' && activeActions['sitting']) targetClipName = 'sitting';
-        else if (animName === 'paw' && activeActions['shake']) targetClipName = 'shake';
-        else if (animName === 'happy' && activeActions['rollover']) targetClipName = 'rollover';
-        else if (animName === 'sleep' && activeActions['play_dead']) targetClipName = 'play_dead';
-        else if ((animName === 'idle' || animName === 'walk') && activeActions['standing']) targetClipName = 'standing';
+        if (animName === 'sit') targetAction = getActionByName('sitting') || targetAction;
+        else if (animName === 'paw') targetAction = getActionByName('shake') || targetAction;
+        else if (animName === 'happy') targetAction = getActionByName('rollover') || targetAction;
+        else if (animName === 'sleep') targetAction = getActionByName('play_dead') || targetAction;
+        else if (animName === 'idle' || animName === 'walk') targetAction = getActionByName('standing') || targetAction;
 
-        if (activeActions[targetClipName]) {
-            const nextAction = activeActions[targetClipName];
-            if (currentClipAction && currentClipName !== targetClipName) {
-                nextAction.reset().play();
-                currentClipAction.crossFadeTo(nextAction, 0.4, true);
-                currentClipAction = nextAction;
-                currentClipName = targetClipName;
+        if (targetAction) {
+            if (currentClipAction && currentClipAction !== targetAction) {
+                targetAction.reset().play();
+                currentClipAction.crossFadeTo(targetAction, 0.4, true);
+                currentClipAction = targetAction;
             } else if (!currentClipAction) {
-                currentClipAction = nextAction;
-                currentClipName = targetClipName;
+                currentClipAction = targetAction;
                 currentClipAction.play();
             }
         }
