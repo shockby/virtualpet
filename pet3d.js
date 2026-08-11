@@ -54,13 +54,6 @@ floor.position.y = -0.9; // Base ground level
 floor.receiveShadow = true;
 scene.add(floor);
 
-// Colors
-const colorMain = 0xe6b87d;   // Soft Tan
-const colorAccent = 0xfff3e3; // Cream
-const colorEars = 0x8c6239;   // Warm Dark Brown
-const colorDark = 0x3e2723;   // Very Dark Brown (Eyes/Nose)
-const colorPink = 0xff8a80;   // Tongue/Blush
-
 // Global references for animation and styling
 let body, belly, headGroup, head, snout, nose, tongue, eyeL, eyeR, blushL, blushR, earLGroup, earL, earRGroup, earR;
 let legFL, legFR, legBL, legBR, tailGroup, tail;
@@ -98,19 +91,24 @@ let defaultScales = {
     legBR: new THREE.Vector3(1, 1, 1),
 };
 
+// Target rotations for smooth slerping / lerping
+let targetRotations = {
+    dogGroup: new THREE.Euler(),
+    headGroup: new THREE.Euler(),
+    tailGroup: new THREE.Euler(),
+    earLGroup: new THREE.Euler(),
+    earRGroup: new THREE.Euler(),
+    legFL: new THREE.Euler(),
+    legFR: new THREE.Euler(),
+    legBL: new THREE.Euler(),
+    legBR: new THREE.Euler(),
+};
+let targetDogPosition = new THREE.Vector3(0, 0, 0);
+
 // Pet Construction Group
 const dogGroup = new THREE.Group();
 scene.add(dogGroup);
 window.dogGroup = dogGroup; // Expose for debugging
-
-// Utility for creating spheres
-function createSphere(r, mat) {
-    const geo = new THREE.SphereGeometry(r, 32, 32);
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    return mesh;
-}
 
 // Clear a group's children helper
 function clearGroup(group) {
@@ -119,73 +117,6 @@ function clearGroup(group) {
         group.remove(obj);
     }
 }
-
-// Species Anatomical Configurations (Positions, Rotations, Scales)
-// These define the physical proportions (poodle's tall square stance, bulldog's wide pear shape)
-const PET_BASE_CONFIGS = {
-    shiba: {
-        legFL: { x: 0.8, y: 0.5, z: 1.0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
-        legFR: { x: -0.8, y: 0.5, z: 1.0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
-        legBL: { x: 0.8, y: 0.5, z: -0.8, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
-        legBR: { x: -0.8, y: 0.5, z: -0.8, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
-        headGroup: { x: 0, y: 2.8, z: 1.2, rx: 0, ry: 0, rz: 0 },
-        tailGroup: { x: 0, y: 1.8, z: -1.8, rx: 0, ry: 0, rz: 0 },
-        bodyScale: { x: 0.9, y: 0.85, z: 1.2 },
-        bellyScale: { x: 0.8, y: 0.8, z: 1.15 },
-        bellyPos: { x: 0, y: 1.1, z: 0.2 },
-        bodyPos: { x: 0, y: 1.3, z: 0 }
-    },
-    poodle: {
-        legFL: { x: 0.7, y: 0.6, z: 0.8, rx: 0, ry: 0, rz: 0, sx: 0.8, sy: 1.35, sz: 0.8 },
-        legFR: { x: -0.7, y: 0.6, z: 0.8, rx: 0, ry: 0, rz: 0, sx: 0.8, sy: 1.35, sz: 0.8 },
-        legBL: { x: 0.7, y: 0.6, z: -0.7, rx: 0, ry: 0, rz: 0, sx: 0.8, sy: 1.35, sz: 0.8 },
-        legBR: { x: -0.7, y: 0.6, z: -0.7, rx: 0, ry: 0, rz: 0, sx: 0.8, sy: 1.35, sz: 0.8 },
-        headGroup: { x: 0, y: 3.1, z: 0.9, rx: 0, ry: 0, rz: 0 },
-        tailGroup: { x: 0, y: 1.8, z: -1.4, rx: 0, ry: 0, rz: 0 },
-        bodyScale: { x: 0.8, y: 0.75, z: 1.05 },
-        bellyScale: { x: 0.7, y: 0.7, z: 0.95 },
-        bellyPos: { x: 0, y: 1.1, z: 0.2 },
-        bodyPos: { x: 0, y: 1.45, z: 0 }
-    },
-    bulldog: {
-        // Reduced rotation angle and pulled back-legs further back to represent a sturdy dog alignment
-        legFL: { x: 1.1, y: 0.45, z: 0.7, rx: 0, ry: 0, rz: 0.12, sx: 1.25, sy: 0.7, sz: 1.25 },
-        legFR: { x: -1.1, y: 0.45, z: 0.7, rx: 0, ry: 0, rz: -0.12, sx: 1.25, sy: 0.7, sz: 1.25 },
-        legBL: { x: 0.85, y: 0.45, z: -0.9, rx: 0, ry: 0, rz: 0, sx: 1.05, sy: 0.7, sz: 1.05 },
-        legBR: { x: -0.85, y: 0.45, z: -0.9, rx: 0, ry: 0, rz: 0, sx: 1.05, sy: 0.7, sz: 1.05 },
-        headGroup: { x: 0, y: 2.2, z: 1.2, rx: 0, ry: 0, rz: 0 },
-        tailGroup: { x: 0, y: 1.3, z: -1.2, rx: 0, ry: 0, rz: 0 },
-        bodyScale: { x: 1.35, y: 0.9, z: 1.15 },
-        bellyScale: { x: 1.1, y: 0.8, z: 1.1 },
-        bellyPos: { x: 0, y: 0.95, z: 0.2 },
-        bodyPos: { x: 0, y: 1.15, z: 0 }
-    },
-    cat: {
-        legFL: { x: 0.65, y: 0.55, z: 0.9, rx: 0, ry: 0, rz: 0, sx: 0.75, sy: 1.25, sz: 0.75 },
-        legFR: { x: -0.65, y: 0.55, z: 0.9, rx: 0, ry: 0, rz: 0, sx: 0.75, sy: 1.25, sz: 0.75 },
-        legBL: { x: 0.65, y: 0.55, z: -0.7, rx: 0, ry: 0, rz: 0, sx: 0.75, sy: 1.25, sz: 0.75 },
-        legBR: { x: -0.65, y: 0.55, z: -0.7, rx: 0, ry: 0, rz: 0, sx: 0.75, sy: 1.25, sz: 0.75 },
-        headGroup: { x: 0, y: 2.9, z: 1.0, rx: 0, ry: 0, rz: 0 },
-        tailGroup: { x: 0, y: 1.6, z: -1.3, rx: 0, ry: 0, rz: 0 },
-        bodyScale: { x: 0.7, y: 0.7, z: 1.25 },
-        bellyScale: { x: 0.6, y: 0.6, z: 1.2 },
-        bellyPos: { x: 0, y: 1.1, z: 0.2 },
-        bodyPos: { x: 0, y: 1.35, z: 0 }
-    },
-    parrot: {
-        legFL: { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, sx: 0.001, sy: 0.001, sz: 0.001 },
-        legFR: { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, sx: 0.001, sy: 0.001, sz: 0.001 },
-        // Angle legs slightly forward for parrot perched posture
-        legBL: { x: 0.32, y: 0.45, z: 0.1, rx: -0.2, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
-        legBR: { x: -0.32, y: 0.45, z: 0.1, rx: -0.2, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
-        headGroup: { x: 0, y: 2.7, z: 0.6, rx: 0, ry: 0, rz: 0 },
-        tailGroup: { x: 0, y: 0.8, z: -0.9, rx: 0, ry: 0, rz: 0 },
-        bodyScale: { x: 0.8, y: 1.2, z: 0.8 },
-        bellyScale: { x: 0.7, y: 0.9, z: 0.75 },
-        bellyPos: { x: 0, y: 1.25, z: 0.35 },
-        bodyPos: { x: 0, y: 1.45, z: 0 }
-    }
-};
 
 // Dynamic Pet Rebuilding Function
 window.setPetType = function (type) {
@@ -269,7 +200,7 @@ window.setPetType = function (type) {
             poodle:  { scale: 0.35, x: 0, y: -1.3,  z: 0, rotY: 0 },
             pug:     { scale: 13.2, x: 0, y: -0.9,  z: 0, rotY: 0 },
             beagle:  { scale: 0.072,x: 0, y: -0.9,  z: 0, rotY: 0 },
-            cat:     { scale: 0.16, x: 0, y: -0.9,  z: 0, rotY: 0 }, // rotY = 0 is facing forward for new kitten
+            cat:     { scale: 0.16, x: 0, y: -0.9,  z: 0, rotY: 0 },
             parrot:  { scale: 0.54, x: 0, y: -0.9,  z: 0, rotY: 0 }
         };
 
@@ -278,8 +209,6 @@ window.setPetType = function (type) {
         model.scale.set(config.scale, config.scale, config.scale);
         model.position.set(config.x, config.y, config.z);
         model.rotation.y = config.rotY;
-
-        console.log(`[GLTF LOAD] Configured ${type} with scale=${config.scale}, position=(${config.x}, ${config.y}, ${config.z}), rotationY=${config.rotY}`);
 
         dogGroup.add(model);
         modelBaseY = model.position.y;
@@ -327,9 +256,11 @@ window.setPetType = function (type) {
         if (headGroup) {
             defaultRotations.headGroup.copy(headGroup.rotation);
             defaultScales.headGroup.copy(headGroup.scale);
+            targetRotations.headGroup.copy(headGroup.rotation);
         }
         if (tailGroup) {
             defaultRotations.tailGroup.copy(tailGroup.rotation);
+            targetRotations.tailGroup.copy(tailGroup.rotation);
         }
         if (body) {
             defaultScales.body.copy(body.scale);
@@ -337,29 +268,35 @@ window.setPetType = function (type) {
         if (earLGroup) {
             defaultRotations.earLGroup.copy(earLGroup.rotation);
             defaultScales.earLGroup.copy(earLGroup.scale);
+            targetRotations.earLGroup.copy(earLGroup.rotation);
         }
         if (earRGroup) {
             defaultRotations.earRGroup.copy(earRGroup.rotation);
             defaultScales.earRGroup.copy(earRGroup.scale);
+            targetRotations.earRGroup.copy(earRGroup.rotation);
         }
         if (legFL) {
             defaultRotations.legFL.copy(legFL.rotation);
             defaultScales.legFL.copy(legFL.scale);
+            targetRotations.legFL.copy(legFL.rotation);
         }
         if (legFR) {
             defaultRotations.legFR.copy(legFR.rotation);
             defaultScales.legFR.copy(legFR.scale);
+            targetRotations.legFR.copy(legFR.rotation);
         }
         if (legBL) {
             defaultRotations.legBL.copy(legBL.rotation);
             defaultScales.legBL.copy(legBL.scale);
+            targetRotations.legBL.copy(legBL.rotation);
         }
         if (legBR) {
             defaultRotations.legBR.copy(legBR.rotation);
             defaultScales.legBR.copy(legBR.scale);
+            targetRotations.legBR.copy(legBR.rotation);
         }
 
-        // For Parrot, set up AnimationMixer
+        // For Parrot or models with clip animations
         if (gltf.animations && gltf.animations.length > 0) {
             activeMixer = new THREE.AnimationMixer(model);
             const action = activeMixer.clipAction(gltf.animations[0]);
@@ -405,13 +342,32 @@ const j4 = new THREE.Mesh(jointGeo, boneMat); j4.position.set(0.4, -0.12, -0.12)
 boneGroup.visible = false;
 scene.add(boneGroup);
 
-// === Animation System ===
+// === Animation System & Interactive State ===
 let clock = new THREE.Clock();
 let currentAnim = 'idle';
 let animTime = 0;
 let fetchPhase = 'idle';
 let fetchTime = 0;
 window.currentPersonality = 'normal';
+
+// Navigation & Wandering state
+let isWalking = false;
+let walkTarget = new THREE.Vector3();
+let idleWanderTimer = 0;
+let lastInteractionTime = Date.now();
+
+// Mouse Look-At State
+const mouse = new THREE.Vector2(0, 0);
+let isMouseActive = false;
+let mouseInactiveTimer = 0;
+const raycaster = new THREE.Raycaster();
+
+// Ear twitch & head glance state
+let earTwitchTimer = 0;
+let earTwitchLeft = false;
+let earTwitchAngle = 0;
+let headGlanceTimer = 0;
+let headGlanceOffset = new THREE.Euler();
 
 window.setDogPersonality = function (p) {
     window.currentPersonality = p;
@@ -420,21 +376,25 @@ window.setDogPersonality = function (p) {
 window.setDogAnimation = function (animName) {
     currentAnim = animName;
     animTime = 0;
+    lastInteractionTime = Date.now();
 
-    const petType = window.activePetType || 'shiba';
+    if (animName !== 'walk') {
+        isWalking = false;
+    }
 
-    // Reset positions/rotations to baseline
-    dogGroup.position.set(0, 0, 0);
-    dogGroup.rotation.set(0, 0, 0);
+    // Baseline target position and rotations for smooth slerping
+    targetDogPosition.set(0, 0, 0);
+    targetRotations.dogGroup.set(0, 0, 0);
 
-    if (headGroup) headGroup.rotation.copy(defaultRotations.headGroup);
-    if (tailGroup) tailGroup.rotation.copy(defaultRotations.tailGroup);
-    if (earLGroup) earLGroup.rotation.copy(defaultRotations.earLGroup);
-    if (earRGroup) earRGroup.rotation.copy(defaultRotations.earRGroup);
-    if (legFL) legFL.rotation.copy(defaultRotations.legFL);
-    if (legFR) legFR.rotation.copy(defaultRotations.legFR);
-    if (legBL) legBL.rotation.copy(defaultRotations.legBL);
-    if (legBR) legBR.rotation.copy(defaultRotations.legBR);
+    // Reset targets to baseline defaults
+    targetRotations.headGroup.copy(defaultRotations.headGroup);
+    targetRotations.tailGroup.copy(defaultRotations.tailGroup);
+    targetRotations.earLGroup.copy(defaultRotations.earLGroup);
+    targetRotations.earRGroup.copy(defaultRotations.earRGroup);
+    targetRotations.legFL.copy(defaultRotations.legFL);
+    targetRotations.legFR.copy(defaultRotations.legFR);
+    targetRotations.legBL.copy(defaultRotations.legBL);
+    targetRotations.legBR.copy(defaultRotations.legBR);
 
     // Bone Visibility
     if (animName !== 'fetch') {
@@ -442,25 +402,23 @@ window.setDogAnimation = function (animName) {
     }
 
     if (animName === 'sleep') {
-        // Lay down the model
-        dogGroup.position.y = -0.3;
-        dogGroup.rotation.x = 0.2;
-        dogGroup.rotation.z = 1.35; // Lay on side
+        targetDogPosition.y = -0.3;
+        targetRotations.dogGroup.x = 0.2;
+        targetRotations.dogGroup.z = 1.35; // Lay on side
         
-        if (headGroup) headGroup.rotation.y = defaultRotations.headGroup.y + 0.3;
-        if (legFL) legFL.rotation.x = defaultRotations.legFL.x + 0.4;
-        if (legFR) legFR.rotation.x = defaultRotations.legFR.x + 0.4;
-        if (legBL) legBL.rotation.x = defaultRotations.legBL.x - 0.4;
-        if (legBR) legBR.rotation.x = defaultRotations.legBR.x - 0.4;
+        targetRotations.headGroup.y = defaultRotations.headGroup.y + 0.3;
+        targetRotations.legFL.x = defaultRotations.legFL.x + 0.4;
+        targetRotations.legFR.x = defaultRotations.legFR.x + 0.4;
+        targetRotations.legBL.x = defaultRotations.legBL.x - 0.4;
+        targetRotations.legBR.x = defaultRotations.legBR.x - 0.4;
     } else if (animName === 'sit') {
-        // Sit baseline
-        dogGroup.position.y = -0.15;
-        dogGroup.rotation.x = -0.1;
-        if (legBL) legBL.rotation.x = defaultRotations.legBL.x - 0.6;
-        if (legBR) legBR.rotation.x = defaultRotations.legBR.x - 0.6;
+        targetDogPosition.y = -0.15;
+        targetRotations.dogGroup.x = -0.1;
+        targetRotations.legBL.x = defaultRotations.legBL.x - 0.6;
+        targetRotations.legBR.x = defaultRotations.legBR.x - 0.6;
     } else if (animName === 'paw') {
-        if (legFL) legFL.rotation.x = defaultRotations.legFL.x + 1.0;
-        if (headGroup) headGroup.rotation.z = defaultRotations.headGroup.z - 0.15;
+        targetRotations.legFL.x = defaultRotations.legFL.x + 1.0;
+        targetRotations.headGroup.z = defaultRotations.headGroup.z - 0.15;
     } else if (animName === 'fetch') {
         fetchPhase = 'throwing';
         fetchTime = 0;
@@ -469,6 +427,21 @@ window.setDogAnimation = function (animName) {
         boneGroup.rotation.set(Math.random()*2, Math.random()*2, Math.random()*2);
     }
 };
+
+// Initiate smooth walking to target coordinate
+function walkTo(targetPos) {
+    // Clamp walking destination to valid floor radius
+    const maxRadius = 3.5;
+    if (targetPos.length() > maxRadius) {
+        targetPos.normalize().multiplyScalar(maxRadius);
+    }
+    
+    walkTarget.copy(targetPos);
+    walkTarget.y = 0; // Ground plane
+    isWalking = true;
+    currentAnim = 'walk';
+    lastInteractionTime = Date.now();
+}
 
 window.updateDogShape = function (params) {
     if (!activeModel) return;
@@ -500,19 +473,152 @@ window.updateDogShape = function (params) {
 const initType = localStorage.getItem('pet_type') || 'shiba';
 window.setPetType(initType);
 
+// --- Event Listeners for Interaction (Click-to-Walk & Mouse Look-At) ---
+window.addEventListener('mousemove', (e) => {
+    const rect = container.getBoundingClientRect();
+    if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        isMouseActive = true;
+        mouseInactiveTimer = 0;
+    }
+});
+
+container.addEventListener('pointerdown', (e) => {
+    // Raycast to find click position on floor
+    const rect = container.getBoundingClientRect();
+    const clickMouse = new THREE.Vector2(
+        ((e.clientX - rect.left) / rect.width) * 2 - 1,
+        -((e.clientY - rect.top) / rect.height) * 2 + 1
+    );
+
+    raycaster.setFromCamera(clickMouse, camera);
+    const intersects = raycaster.intersectObject(floor);
+
+    if (intersects.length > 0) {
+        const clickPoint = intersects[0].point;
+        // Don't walk if fetch is active
+        if (currentAnim !== 'fetch') {
+            walkTo(clickPoint);
+        }
+    }
+});
+
+// Smooth Quaternion Slerp Helper for Euler Rotations
+function slerpEuler(currentEuler, targetEuler, speed) {
+    const qCurrent = new THREE.Quaternion().setFromEuler(currentEuler);
+    const qTarget = new THREE.Quaternion().setFromEuler(targetEuler);
+    qCurrent.slerp(qTarget, speed);
+    currentEuler.setFromQuaternion(qCurrent);
+}
+
 function animate() {
     requestAnimationFrame(animate);
 
     let delta = clock.getDelta();
-
     let speedMulti = 1.0;
-    if (window.currentPersonality === 'energetic') speedMulti = 1.5;
-    else if (window.currentPersonality === 'lazy') speedMulti = 0.5;
-    else if (window.currentPersonality === 'glutton') speedMulti = 1.1;
+    if (window.currentPersonality === 'energetic') speedMulti = 1.4;
+    else if (window.currentPersonality === 'lazy') speedMulti = 0.65;
+    else if (window.currentPersonality === 'glutton') speedMulti = 1.05;
 
     animTime += delta * speedMulti;
+    mouseInactiveTimer += delta;
 
-    const petType = window.activePetType || 'shiba';
+    if (mouseInactiveTimer > 4.0) {
+        isMouseActive = false;
+    }
+
+    // --- 1. Smooth Interpolation to Base Targets ---
+    const lerpSpeed = delta * 6.0;
+    dogGroup.position.lerp(targetDogPosition, lerpSpeed);
+    slerpEuler(dogGroup.rotation, targetRotations.dogGroup, lerpSpeed);
+
+    if (legFL) slerpEuler(legFL.rotation, targetRotations.legFL, lerpSpeed);
+    if (legFR) slerpEuler(legFR.rotation, targetRotations.legFR, lerpSpeed);
+    if (legBL) slerpEuler(legBL.rotation, targetRotations.legBL, lerpSpeed);
+    if (legBR) slerpEuler(legBR.rotation, targetRotations.legBR, lerpSpeed);
+
+    // --- 2. Idle Micro-Motions (Breathing, Ear Twitches, Glances) ---
+    earTwitchTimer += delta;
+    if (earTwitchTimer > 3.5 + Math.random() * 4.0) {
+        earTwitchTimer = 0;
+        earTwitchLeft = Math.random() > 0.5;
+        earTwitchAngle = (Math.random() > 0.5 ? 1 : -1) * 0.25;
+    }
+
+    headGlanceTimer += delta;
+    if (headGlanceTimer > 5.0 + Math.random() * 5.0) {
+        headGlanceTimer = 0;
+        if (Math.random() < 0.6) {
+            headGlanceOffset.set(
+                (Math.random() - 0.5) * 0.1,
+                (Math.random() - 0.5) * 0.3,
+                (Math.random() - 0.5) * 0.15
+            );
+        } else {
+            headGlanceOffset.set(0, 0, 0);
+        }
+    }
+
+    // --- 3. Autonomous Wandering (Idle Walk) ---
+    if (currentAnim === 'idle' && !isWalking) {
+        idleWanderTimer += delta;
+        // Wander every 12 - 20 seconds if inactive
+        if (idleWanderTimer > 12.0 && (Date.now() - lastInteractionTime > 10000)) {
+            idleWanderTimer = 0;
+            const randomAngle = Math.random() * Math.PI * 2;
+            const randomDist = 1.2 + Math.random() * 1.8;
+            const wanderPos = new THREE.Vector3(
+                Math.cos(randomAngle) * randomDist,
+                0,
+                Math.sin(randomAngle) * randomDist
+            );
+            walkTo(wanderPos);
+        }
+    } else {
+        idleWanderTimer = 0;
+    }
+
+    // --- 4. Walking Navigation & Walk Cycle Animation ---
+    if (isWalking && currentAnim === 'walk') {
+        const dist = dogGroup.position.distanceTo(walkTarget);
+        if (dist > 0.15) {
+            // Smoothly rotate towards target direction
+            const dir = walkTarget.clone().sub(dogGroup.position).normalize();
+            const targetAngle = Math.atan2(dir.x, dir.z);
+            
+            // Shortest angle rotation
+            let diff = targetAngle - dogGroup.rotation.y;
+            while (diff < -Math.PI) diff += Math.PI * 2;
+            while (diff > Math.PI) diff -= Math.PI * 2;
+            dogGroup.rotation.y += diff * delta * 7.0;
+
+            // Move forward
+            const stepDist = Math.min(delta * 2.2 * speedMulti, dist);
+            dogGroup.position.add(dir.multiplyScalar(stepDist));
+
+            // Procedural Walk Cycle (Diagonal leg swing + Body Bobbing + Weight Shift)
+            const walkCycle = animTime * 12.0 * speedMulti;
+            const legSwing = Math.sin(walkCycle) * 0.45;
+            
+            if (legFL) legFL.rotation.x = defaultRotations.legFL.x + legSwing;
+            if (legBR) legBR.rotation.x = defaultRotations.legBR.x + legSwing;
+            if (legFR) legFR.rotation.x = defaultRotations.legFR.x - legSwing;
+            if (legBL) legBL.rotation.x = defaultRotations.legBL.x - legSwing;
+
+            // Upward vertical bobbing and roll weight shift
+            dogGroup.position.y = targetDogPosition.y + Math.abs(Math.sin(walkCycle * 2.0)) * 0.08;
+            dogGroup.rotation.z = Math.sin(walkCycle) * 0.04;
+
+            if (tailGroup) {
+                tailGroup.rotation.y = defaultRotations.tailGroup.y + Math.sin(walkCycle * 1.5) * 0.4;
+            }
+        } else {
+            // Arrived at destination
+            isWalking = false;
+            window.setDogAnimation('idle');
+        }
+    }
 
     // Update GLTF animation mixer if exists (e.g. Parrot)
     if (activeMixer) {
@@ -521,34 +627,59 @@ function animate() {
 
     if (activeModel) {
         if (currentAnim === 'idle') {
-            // Soft breathing motion
-            activeModel.position.y = modelBaseY + Math.sin(animTime * 2.0) * 0.03;
-            
-            if (headGroup) {
-                headGroup.rotation.y = defaultRotations.headGroup.y + Math.sin(animTime * 1.5) * 0.08;
-                headGroup.rotation.x = defaultRotations.headGroup.x + Math.sin(animTime * 1.0) * 0.03;
+            // Organic Breathing motion
+            const breath = Math.sin(animTime * 2.2);
+            activeModel.position.y = modelBaseY + breath * 0.025;
+            if (body) {
+                body.scale.set(
+                    defaultScales.body.x * (1 + breath * 0.015),
+                    defaultScales.body.y * (1 + breath * 0.02),
+                    defaultScales.body.z * (1 - breath * 0.01)
+                );
             }
+            
+            // Dynamic Tail wagging
             if (tailGroup) {
-                tailGroup.rotation.y = defaultRotations.tailGroup.y + Math.sin(animTime * 4) * 0.25;
+                const wagSpeed = (window.currentPersonality === 'energetic') ? 6.5 : 3.5;
+                tailGroup.rotation.y = defaultRotations.tailGroup.y + Math.sin(animTime * wagSpeed) * 0.3;
+                tailGroup.rotation.z = defaultRotations.tailGroup.z + Math.cos(animTime * wagSpeed * 0.5) * 0.1;
             }
         } else if (currentAnim === 'happy') {
-            // Jumping up and down
-            dogGroup.position.y = Math.abs(Math.sin(animTime * 10)) * 0.7;
+            // Joyful Jumping up and down with side wiggles
+            dogGroup.position.y = Math.abs(Math.sin(animTime * 11)) * 0.7;
+            dogGroup.rotation.z = Math.sin(animTime * 11) * 0.08;
+
             if (tailGroup) {
-                tailGroup.rotation.y = defaultRotations.tailGroup.y + Math.sin(animTime * 20) * 0.6;
+                tailGroup.rotation.y = defaultRotations.tailGroup.y + Math.sin(animTime * 22) * 0.7;
             }
             if (headGroup) {
-                headGroup.rotation.x = defaultRotations.headGroup.x - 0.1 + Math.sin(animTime * 10) * 0.05;
+                headGroup.rotation.x = defaultRotations.headGroup.x - 0.1 + Math.sin(animTime * 11) * 0.08;
             }
         } else if (currentAnim === 'sleep') {
-            // Shallow breathing
-            activeModel.position.y = modelBaseY + Math.sin(animTime * 1.2) * 0.015;
+            // Deep slow breathing sleeping posture
+            const sleepBreath = Math.sin(animTime * 1.2);
+            activeModel.position.y = modelBaseY + sleepBreath * 0.018;
+            if (body) {
+                body.scale.set(
+                    defaultScales.body.x * (1 + sleepBreath * 0.025),
+                    defaultScales.body.y * (1 + sleepBreath * 0.03),
+                    defaultScales.body.z * (1 - sleepBreath * 0.015)
+                );
+            }
         } else if (currentAnim === 'sit') {
-            if (headGroup) headGroup.rotation.y = defaultRotations.headGroup.y + Math.sin(animTime * 1.2) * 0.05;
-            if (tailGroup) tailGroup.rotation.y = defaultRotations.tailGroup.y + Math.sin(animTime * 3) * 0.08;
+            const breath = Math.sin(animTime * 1.8);
+            if (headGroup) headGroup.rotation.y = defaultRotations.headGroup.y + Math.sin(animTime * 1.2) * 0.06;
+            if (tailGroup) tailGroup.rotation.y = defaultRotations.tailGroup.y + Math.sin(animTime * 3.5) * 0.12;
+            if (body) {
+                body.scale.set(
+                    defaultScales.body.x * (1 + breath * 0.012),
+                    defaultScales.body.y * (1 + breath * 0.018),
+                    defaultScales.body.z
+                );
+            }
         } else if (currentAnim === 'paw') {
-            if (legFL) legFL.rotation.z = defaultRotations.legFL.z + Math.sin(animTime * 8) * 0.12;
-            if (tailGroup) tailGroup.rotation.y = defaultRotations.tailGroup.y + Math.sin(animTime * 15) * 0.4;
+            if (legFL) legFL.rotation.z = defaultRotations.legFL.z + Math.sin(animTime * 8) * 0.15;
+            if (tailGroup) tailGroup.rotation.y = defaultRotations.tailGroup.y + Math.sin(animTime * 15) * 0.45;
         } else if (currentAnim === 'fetch') {
             fetchTime += delta;
 
@@ -574,10 +705,10 @@ function animate() {
 
                 // Run cycle
                 if (legFL && legFR && legBL && legBR) {
-                    legFL.rotation.x = defaultRotations.legFL.x + Math.sin(fetchTime * 15) * 0.5;
-                    legFR.rotation.x = defaultRotations.legFR.x - Math.sin(fetchTime * 15) * 0.5;
-                    legBL.rotation.x = defaultRotations.legBL.x - Math.sin(fetchTime * 15) * 0.5;
-                    legBR.rotation.x = defaultRotations.legBR.x + Math.sin(fetchTime * 15) * 0.5;
+                    legFL.rotation.x = defaultRotations.legFL.x + Math.sin(fetchTime * 16) * 0.55;
+                    legFR.rotation.x = defaultRotations.legFR.x - Math.sin(fetchTime * 16) * 0.55;
+                    legBL.rotation.x = defaultRotations.legBL.x - Math.sin(fetchTime * 16) * 0.55;
+                    legBR.rotation.x = defaultRotations.legBR.x + Math.sin(fetchTime * 16) * 0.55;
                 }
                 if (tailGroup) tailGroup.rotation.y = defaultRotations.tailGroup.y + Math.sin(fetchTime * 25) * 0.5;
 
@@ -603,10 +734,10 @@ function animate() {
 
                 // Run cycle
                 if (legFL && legFR && legBL && legBR) {
-                    legFL.rotation.x = defaultRotations.legFL.x + Math.sin(fetchTime * 15) * 0.4;
-                    legFR.rotation.x = defaultRotations.legFR.x - Math.sin(fetchTime * 15) * 0.4;
-                    legBL.rotation.x = defaultRotations.legBL.x - Math.sin(fetchTime * 15) * 0.4;
-                    legBR.rotation.x = defaultRotations.legBR.x + Math.sin(fetchTime * 15) * 0.4;
+                    legFL.rotation.x = defaultRotations.legFL.x + Math.sin(fetchTime * 16) * 0.45;
+                    legFR.rotation.x = defaultRotations.legFR.x - Math.sin(fetchTime * 16) * 0.45;
+                    legBL.rotation.x = defaultRotations.legBL.x - Math.sin(fetchTime * 16) * 0.45;
+                    legBR.rotation.x = defaultRotations.legBR.x + Math.sin(fetchTime * 16) * 0.45;
                 }
                 if (tailGroup) tailGroup.rotation.y = defaultRotations.tailGroup.y + Math.sin(fetchTime * 25) * 0.5;
 
@@ -629,9 +760,39 @@ function animate() {
         }
     }
 
-    if (currentAnim !== 'sleep' && currentAnim !== 'fetch' && dogGroup) {
-        dogGroup.rotation.y = Math.sin(animTime * 0.3) * 0.25;
+    // --- 5. Mouse & Glance Head Look-At Tracking ---
+    if (headGroup && currentAnim !== 'sleep' && currentAnim !== 'fetch') {
+        let lookTargetEuler = new THREE.Euler().copy(targetRotations.headGroup);
+
+        if (isMouseActive) {
+            // Inverse map mouse relative to pet's facing angle
+            const mouseAngleY = -mouse.x * 0.45;
+            const mouseAngleX = -mouse.y * 0.25;
+
+            lookTargetEuler.y += mouseAngleY;
+            lookTargetEuler.x += mouseAngleX;
+        } else {
+            // Apply gentle random head glances when mouse is inactive
+            lookTargetEuler.x += headGlanceOffset.x;
+            lookTargetEuler.y += headGlanceOffset.y;
+            lookTargetEuler.z += headGlanceOffset.z;
+        }
+
+        slerpEuler(headGroup.rotation, lookTargetEuler, delta * 4.5);
     }
+
+    // --- 6. Apply Ear Twitches ---
+    if (earLGroup) {
+        let targetEarL = defaultRotations.earLGroup.z + (earTwitchLeft ? earTwitchAngle : 0);
+        earLGroup.rotation.z = THREE.MathUtils.lerp(earLGroup.rotation.z, targetEarL, delta * 12.0);
+    }
+    if (earRGroup) {
+        let targetEarR = defaultRotations.earRGroup.z + (!earTwitchLeft ? earTwitchAngle : 0);
+        earRGroup.rotation.z = THREE.MathUtils.lerp(earRGroup.rotation.z, targetEarR, delta * 12.0);
+    }
+
+    // Return ear twitch angle back to 0
+    earTwitchAngle = THREE.MathUtils.lerp(earTwitchAngle, 0, delta * 8.0);
 
     renderer.render(scene, camera);
 }
