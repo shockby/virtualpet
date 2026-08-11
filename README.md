@@ -17,20 +17,34 @@ Google Gemini API と Web Speech API を組み合わせることで、ペット�
 - **音声入力**: 音声認識により、マイクを使ってハンズフリーでペットに話しかけられます。
 - **音声読み上げ**: ペットの返答を音声で読み上げます。ペットの性格タイプ（normal, energetic, lazy, glutton）に合わせて、声のピッチ（高低）や読み上げ速度が変化します。
 
-### 3. 🍖 インタラクティブな3Dアクション & お世話
-- **骨投げ (Fetch)**: 「骨を投げる」と指示するか、骨投げボタンを押すと、3D空間に投げられた骨をペットが自ら走って追いかけ、くわえて戻ってくる高度な物理アニメーションが楽しめます。
+### 3. 🏃‍♂️ 躍動感あふれる3Dアニメーション & 自律移動
+- **滑らかな連続ポーズ補間 (Smooth Pose Interpolation)**:  
+  ポーズ切り替え時に `slerp` / `lerp` による姿勢イージング処理を行い、カクつくことなくスムーズにモーションが繋がります。
+- **生き生きとしたアイドル・マイクロモーション (Organic Micro-Motions)**:  
+  呼吸による胸・お腹の伸縮、耳のランダムなピクピク動作、定期的な首傾げ・きょろきょろ視線変更、動的尾振りを自動生成。生き生きとした質感を演出します。
+- **マウスカーソル視線追従 (Mouse Look-At)**:  
+  3Dキャンバス上でマウスカーソルを動かすと、ペットの頭部が自然に飼い主（カーソル）を追いかけます。
+- **床面クリック移動 & 気まぐれ徘徊 (Click-to-Walk & Autonomous Wandering)**:  
+  - **クリック移動**: 3Dキャンバスの床をクリックすると、レイキャストで座標を計算し、目標位置へ向きを変えてトコトコ歩いて移動します。
+  - **気まぐれ徘徊**: アイドル状態のまま放置されると、ペットが自主的に床の上を気まぐれに歩き回ります。
+- **本格キーフレームアニメーション連動 (AnimationClip Crossfading)**:  
+  `Baby Dog`, `Shiba Inu`, `Cat`, `Parrot` などのモデルでは、内蔵アニメーション（立ち姿、お座り、お手/シェイク、ゴロン、死んだふり等）の自動検出と滑らかなクロスフェード（`crossFadeTo`）に対応しています。
+
+### 4. 🍖 インタラクティブなお世話 & 骨投げ
+- **骨投げ (Fetch)**: 「骨を投げる」と指示するか、骨投げボタンを押すと、3D空間に投げられた骨をペットが自ら走って追いかけ、くわえて戻ってくる物理アクションが楽しめます。
 - **お世話コマンド**: ごはん (Feed)、あそぶ (Play)、すいみん (Sleep) でペットのお腹、幸福度、体力をケア。
 - **ステータス管理**: 時間の経過とともに減少するお腹や体力を適切に維持する必要があります。
 
-### 4. ⚙️ クォータ節約設計 & フォールバック（APIの無駄使い防止）
+### 5. ⚙️ クォータ節約設計 & フォールバック（APIの無駄使い防止）
 APIの無料枠制限（429エラー）を安全に回避するための堅牢な仕組みを実装しています。
 - **モデル自動フォールバックチェーン**: `gemini-2.0-flash-lite` ＞ `gemini-1.5-flash` ＞ `gemini-1.5-pro` の順に自動で切り替え、指数バックオフで再試行します。
 - **インテリジェントな「ひとりごと」**: 放置時にペットが自発的に思考を表示する際、APIリクエストの間隔を制限（最低10分に1回）。APIを使わない「ローカル定型文」と組み合わせて、トークン消費を最小限に抑えます。
 - **1日のAPI制限機能**: 1日のリクエスト上限（50回）をブラウザ側でカウント。上限超過時は安全にAPIアクセスをブロックし、ペットがおやすみモードに入ります。
 
-### 5. 🎨 洗練されたグラスモーフィックUI
+### 6. 🎨 洗練されたグラスモーフィックUI & 多彩なペット種類
 - 画面を3Dキャンバスとチャットログのみに絞り込み、極限までクリーンに。
-- お世話、性格設定、体型スライダーなどのカスタマイズ要素は、美しい半透明のグラスモーフィックモーダルへ集約し、没入感を高めました。
+- お世話、性格設定、体型スライダーなどのカスタマイズ要素は、美しい半透明のグラスモーフィックモーダルへ集約。
+- **ペットの種類設定**: 柴犬 (Shiba Inu), Baby Dog (子犬), トイプードル (Toy Poodle), パグ (Pug), ビーグル (Beagle), 猫 (Cat), オウム (Parrot) の7種類からお気に入りのペットを選択可能。
 - **ペットの名前設定**: ペットの名前をカスタマイズでき、「○○の部屋」としてUI全体およびAIのシステムプロンプトにリアルタイムで同期・永続化（`localStorage`）されます。
 
 ---
@@ -74,7 +88,7 @@ npx wrangler pages deploy .
 - `index.html` - 美しいグラスモーフィックUIと各種設定モーダルを備えたメインHTML。
 - `style.css` - ガラスエフェクト（backdrop-filter）、ダークモード、洗練されたアニメーションを定義するCSS。
 - `app.js` - UIイベント、ステータス減衰ループ、APIキー管理、音声認識/合成、AIリクエストおよびフォールバック制御などを司るメインロジック。
-- `pet3d.js` - Three.js を用いたペットモデルの組み立て、ボーン駆動型アニメーション（fetch, paw, sit, idle, happy, sleep）、体型パラメトリック変形処理の制御。
+- `pet3d.js` - Three.js を用いたペットモデルの組み立て、連続ポーズ補間、自律歩行、視線追従、キーフレームアニメーション（fetch, paw, sit, idle, happy, sleep）、体型パラメトリック変形処理の制御。
 - `wrangler.toml` - Cloudflare Pagesの直接デプロイ設定。
 
 ---
@@ -88,11 +102,12 @@ npx wrangler pages deploy .
 - **Platform**: Cloudflare Pages / Wrangler
 
 
-# 3D Dog Model Credit
+# 3D Model Credits
 
-- Shiba Inu by Quaternius (https://poly.pizza/m/y4wdQpg767)
+- "Animated Dog, Shiba Inu" (https://skfb.ly/6SrJO) by quander [CC-BY 4.0] (http://creativecommons.org/licenses/by/4.0/) via Sketchfab
+- "Baby Dog" (https://skfb.ly/oUIoZ) by noahmostafa664 [CC-BY 4.0] (http://creativecommons.org/licenses/by/4.0/) via Sketchfab
 - Beagle by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/0BnDT3T1wTE)
 - Poodle by jeremy [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/2ig2NlSneau)
 - Pug by Workshop apelab [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/f1YBNg2R0nj)
-- Kitten by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/dBJgGEu5bHW)
-- Parrot by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/35EeLqGHH1y)
+- "An Animated Cat" (https://skfb.ly/6YPwH) by Evil_Katz [CC-BY 4.0] (http://creativecommons.org/licenses/by/4.0/) via Sketchfab
+- "Love Birds Parrot" (https://skfb.ly/oLuSK) by Nyilonelycompany [CC BY-NC 4.0] (http://creativecommons.org/licenses/by-nc/4.0/) via Sketchfab
