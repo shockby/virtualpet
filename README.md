@@ -96,4 +96,4 @@ npx wrangler pages deploy .
 - Poodle by jeremy [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/2ig2NlSneau)
 - Pug by Workshop apelab [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/f1YBNg2R0nj)
 - Kitten by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/dBJgGEu5bHW)
-- Parrot by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/35EeLqGHH1y)
+- "Love Birds Parrot" (https://skfb.ly/oLuSK) by Nyilonelycompany [CC BY-NC 4.0] (http://creativecommons.org/licenses/by-nc/4.0/) via Sketchfab
