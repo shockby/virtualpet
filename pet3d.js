@@ -20,6 +20,60 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 container.appendChild(renderer.domElement);
 
+// Loading Indicator Overlay UI
+let petLoadingIndicator = document.getElementById('pet-loading-indicator');
+if (!petLoadingIndicator) {
+    petLoadingIndicator = document.createElement('div');
+    petLoadingIndicator.id = 'pet-loading-indicator';
+    petLoadingIndicator.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.88);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 12px 24px;
+        border-radius: 30px;
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #2c3e50;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        border: 1px solid rgba(255,255,255,0.7);
+        pointer-events: none;
+        display: none;
+        align-items: center;
+        gap: 10px;
+        z-index: 100;
+        transition: opacity 0.3s ease;
+    `;
+    petLoadingIndicator.innerHTML = `
+        <div style="width: 18px; height: 18px; border: 3px solid #e2e8f0; border-top: 3px solid #3b82f6; border-radius: 50%; animation: petSpin 0.8s linear infinite;"></div>
+        <span id="pet-loading-text">ペットを準備中...</span>
+    `;
+    const style = document.createElement('style');
+    style.textContent = `@keyframes petSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+    document.head.appendChild(style);
+    container.style.position = 'relative';
+    container.appendChild(petLoadingIndicator);
+}
+
+function showLoading(text) {
+    if (petLoadingIndicator) {
+        document.getElementById('pet-loading-text').textContent = text || '3Dモデルを準備中...';
+        petLoadingIndicator.style.display = 'flex';
+        petLoadingIndicator.style.opacity = '1';
+    }
+}
+
+function hideLoading() {
+    if (petLoadingIndicator) {
+        petLoadingIndicator.style.opacity = '0';
+        setTimeout(() => { petLoadingIndicator.style.display = 'none'; }, 300);
+    }
+}
+
 // Cinematic three-point lighting setup
 const ambientLight = new THREE.AmbientLight(0xfefafd, 0.55); // Warm ambient base
 scene.add(ambientLight);
@@ -185,8 +239,11 @@ window.setPetType = function (type) {
         glbPath = 'assets/ShibaInu.glb' + cacheBuster;
     }
 
+    showLoading(`ペットを準備中...`);
+
     loader.load(glbPath, function (gltf) {
         if (myLoadId !== currentLoadId) return;
+        hideLoading();
 
         const model = gltf.scene;
         activeModel = model;
@@ -331,8 +388,22 @@ window.setPetType = function (type) {
         // Update animation pose
         window.setDogAnimation(currentAnim);
 
-    }, undefined, function (error) {
+    }, function (xhr) {
+        if (xhr.lengthComputable && myLoadId === currentLoadId) {
+            const percent = Math.round((xhr.loaded / xhr.total) * 100);
+            showLoading(`モデルを準備中... ${percent}%`);
+        }
+    }, function (error) {
+        if (myLoadId !== currentLoadId) return;
         console.error('An error happened while loading GLTF pet model:', error);
+        showLoading('読み込みに失敗しました。再試行中...');
+        setTimeout(() => {
+            if (myLoadId === currentLoadId && type !== 'shiba') {
+                window.setPetType('shiba');
+            } else {
+                hideLoading();
+            }
+        }, 2000);
     });
 };
 
