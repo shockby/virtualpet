@@ -3,10 +3,10 @@ const container = document.getElementById('pet-canvas-container');
 const scene = new THREE.Scene();
 window.scene = scene; // Expose for debugging
 
-// Camera setup (shifted down by 0.7 units to focus on the grounded pet)
+// Camera setup (shifted down to focus on the grounded pet with larger framing)
 const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-camera.position.set(0, 4.3, 14);
-camera.lookAt(0, 0.8, 0);
+camera.position.set(0, 3.2, 10.5);
+camera.lookAt(0, 0.4, 0);
 window.camera = camera; // Expose for debugging
 
 // Renderer setup
@@ -259,15 +259,15 @@ window.setPetType = function (type) {
             }
         });
 
-        // Model transformation parameters hand-tuned for visual excellence
+        // Model transformation parameters hand-tuned for prominent, larger visual display
         const configs = {
-            shiba:    { scale: 0.026, x: 0, y: -0.9,  z: 0, rotY: 0 },
-            baby_dog: { scale: 2.2,   x: 0, y: -0.9,  z: 0, rotY: 0 },
-            poodle:   { scale: 0.35,  x: 0, y: -1.3,  z: 0, rotY: 0 },
-            pug:      { scale: 13.2,  x: 0, y: -0.9,  z: 0, rotY: 0 },
-            beagle:   { scale: 0.072, x: 0, y: -0.9,  z: 0, rotY: 0 },
-            cat:      { scale: 0.105, x: 0, y: -0.9,  z: 0, rotY: 0 },
-            parrot:   { scale: 0.54,  x: 0, y: -0.9,  z: 0, rotY: 0 }
+            shiba:    { scale: 0.040, x: 0, y: -1.2,  z: 0, rotY: 0 },
+            baby_dog: { scale: 3.3,   x: 0, y: -1.2,  z: 0, rotY: 0 },
+            poodle:   { scale: 0.52,  x: 0, y: -1.6,  z: 0, rotY: 0 },
+            pug:      { scale: 19.5,  x: 0, y: -1.2,  z: 0, rotY: 0 },
+            beagle:   { scale: 0.11,  x: 0, y: -1.2,  z: 0, rotY: 0 },
+            cat:      { scale: 0.16,  x: 0, y: -1.2,  z: 0, rotY: 0 },
+            parrot:   { scale: 0.82,  x: 0, y: -1.2,  z: 0, rotY: 0 }
         };
 
         const config = configs[type] || configs.shiba;
