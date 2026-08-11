@@ -168,21 +168,21 @@ window.setPetType = function (type) {
     let glbPath = '';
     const cacheBuster = '?v=' + Date.now();
     if (type === 'shiba') {
-        glbPath = '/assets/ShibaInu.glb' + cacheBuster;
+        glbPath = 'assets/ShibaInu.glb' + cacheBuster;
     } else if (type === 'baby_dog') {
-        glbPath = '/assets/BabyDog.glb' + cacheBuster;
+        glbPath = 'assets/BabyDog.glb' + cacheBuster;
     } else if (type === 'poodle') {
-        glbPath = '/assets/Poodle.glb' + cacheBuster;
+        glbPath = 'assets/Poodle.glb' + cacheBuster;
     } else if (type === 'pug') {
-        glbPath = '/assets/Pug.glb' + cacheBuster;
+        glbPath = 'assets/Pug.glb' + cacheBuster;
     } else if (type === 'beagle') {
-        glbPath = '/assets/Beagle.glb' + cacheBuster;
+        glbPath = 'assets/Beagle.glb' + cacheBuster;
     } else if (type === 'cat') {
-        glbPath = '/assets/Kitten.glb' + cacheBuster;
+        glbPath = 'assets/Kitten.glb' + cacheBuster;
     } else if (type === 'parrot') {
-        glbPath = '/assets/Parrot.glb' + cacheBuster;
+        glbPath = 'assets/Parrot.glb' + cacheBuster;
     } else {
-        glbPath = '/assets/ShibaInu.glb' + cacheBuster;
+        glbPath = 'assets/ShibaInu.glb' + cacheBuster;
     }
 
     loader.load(glbPath, function (gltf) {
@@ -210,7 +210,7 @@ window.setPetType = function (type) {
             pug:      { scale: 13.2,  x: 0, y: -0.9,  z: 0, rotY: 0 },
             beagle:   { scale: 0.072, x: 0, y: -0.9,  z: 0, rotY: 0 },
             cat:      { scale: 0.105, x: 0, y: -0.9,  z: 0, rotY: 0 },
-            parrot:   { scale: 23.0,  x: 0, y: -0.9,  z: 0, rotY: 0 }
+            parrot:   { scale: 0.54,  x: 0, y: -0.9,  z: 0, rotY: 0 }
         };
 
         const config = configs[type] || configs.shiba;
