@@ -91,6 +91,7 @@ npx wrangler pages deploy .
 # 3D Dog Model Credit
 
 - Shiba Inu by Quaternius (https://poly.pizza/m/y4wdQpg767)
+- "Baby Dog" (https://skfb.ly/oUIoZ) by noahmostafa664 [CC-BY 4.0] (http://creativecommons.org/licenses/by/4.0/) via Sketchfab
 - Beagle by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/0BnDT3T1wTE)
 - Poodle by jeremy [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/2ig2NlSneau)
 - Pug by Workshop apelab [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/f1YBNg2R0nj)

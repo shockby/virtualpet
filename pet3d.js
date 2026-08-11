@@ -66,6 +66,9 @@ let whiskersL = [], whiskersR = [];
 const loader = new THREE.GLTFLoader();
 let activeModel = null;
 let activeMixer = null;
+let activeActions = {};
+let currentClipAction = null;
+let currentClipName = '';
 let currentLoadId = 0;
 let modelBaseY = 0;
 
@@ -128,6 +131,9 @@ window.setPetType = function (type) {
     activeModel = null;
     window.activeModel = null;
     activeMixer = null;
+    activeActions = {};
+    currentClipAction = null;
+    currentClipName = '';
 
     // Reset default rotations and scales to identity/defaults
     defaultRotations = {
@@ -163,6 +169,8 @@ window.setPetType = function (type) {
     const cacheBuster = '?v=' + Date.now();
     if (type === 'shiba') {
         glbPath = '/assets/ShibaInu.glb' + cacheBuster;
+    } else if (type === 'baby_dog') {
+        glbPath = '/assets/BabyDog.glb' + cacheBuster;
     } else if (type === 'poodle') {
         glbPath = '/assets/Poodle.glb' + cacheBuster;
     } else if (type === 'pug') {
@@ -196,12 +204,13 @@ window.setPetType = function (type) {
 
         // Model transformation parameters hand-tuned for visual excellence
         const configs = {
-            shiba:   { scale: 2.2,  x: 0, y: -1.1,  z: 0, rotY: 0 },
-            poodle:  { scale: 0.35, x: 0, y: -1.3,  z: 0, rotY: 0 },
-            pug:     { scale: 13.2, x: 0, y: -0.9,  z: 0, rotY: 0 },
-            beagle:  { scale: 0.072,x: 0, y: -0.9,  z: 0, rotY: 0 },
-            cat:     { scale: 0.16, x: 0, y: -0.9,  z: 0, rotY: 0 },
-            parrot:  { scale: 0.54, x: 0, y: -0.9,  z: 0, rotY: 0 }
+            shiba:    { scale: 2.2,   x: 0, y: -1.1,  z: 0, rotY: 0 },
+            baby_dog: { scale: 0.026, x: 0, y: -0.9,  z: 0, rotY: 0 },
+            poodle:   { scale: 0.35,  x: 0, y: -1.3,  z: 0, rotY: 0 },
+            pug:      { scale: 13.2,  x: 0, y: -0.9,  z: 0, rotY: 0 },
+            beagle:   { scale: 0.072, x: 0, y: -0.9,  z: 0, rotY: 0 },
+            cat:      { scale: 0.16,  x: 0, y: -0.9,  z: 0, rotY: 0 },
+            parrot:   { scale: 0.54,  x: 0, y: -0.9,  z: 0, rotY: 0 }
         };
 
         const config = configs[type] || configs.shiba;
@@ -296,11 +305,13 @@ window.setPetType = function (type) {
             targetRotations.legBR.copy(legBR.rotation);
         }
 
-        // For Parrot or models with clip animations
+        // Setup AnimationMixer and Clip Actions if GLTF has embedded animations
         if (gltf.animations && gltf.animations.length > 0) {
             activeMixer = new THREE.AnimationMixer(model);
-            const action = activeMixer.clipAction(gltf.animations[0]);
-            action.play();
+            activeActions = {};
+            gltf.animations.forEach(clip => {
+                activeActions[clip.name] = activeMixer.clipAction(clip);
+            });
         }
 
         // Apply sliders parameters
@@ -395,6 +406,31 @@ window.setDogAnimation = function (animName) {
     targetRotations.legFR.copy(defaultRotations.legFR);
     targetRotations.legBL.copy(defaultRotations.legBL);
     targetRotations.legBR.copy(defaultRotations.legBR);
+
+    // Handle embedded AnimationClip cross-fading if present (e.g. Baby Dog or Parrot)
+    if (activeMixer && Object.keys(activeActions).length > 0) {
+        let targetClipName = Object.keys(activeActions)[0]; // Default fallback clip
+
+        if (animName === 'sit' && activeActions['sitting']) targetClipName = 'sitting';
+        else if (animName === 'paw' && activeActions['shake']) targetClipName = 'shake';
+        else if (animName === 'happy' && activeActions['rollover']) targetClipName = 'rollover';
+        else if (animName === 'sleep' && activeActions['play_dead']) targetClipName = 'play_dead';
+        else if ((animName === 'idle' || animName === 'walk') && activeActions['standing']) targetClipName = 'standing';
+
+        if (activeActions[targetClipName]) {
+            const nextAction = activeActions[targetClipName];
+            if (currentClipAction && currentClipName !== targetClipName) {
+                nextAction.reset().play();
+                currentClipAction.crossFadeTo(nextAction, 0.4, true);
+                currentClipAction = nextAction;
+                currentClipName = targetClipName;
+            } else if (!currentClipAction) {
+                currentClipAction = nextAction;
+                currentClipName = targetClipName;
+                currentClipAction.play();
+            }
+        }
+    }
 
     // Bone Visibility
     if (animName !== 'fetch') {
@@ -597,21 +633,22 @@ function animate() {
             const stepDist = Math.min(delta * 2.2 * speedMulti, dist);
             dogGroup.position.add(dir.multiplyScalar(stepDist));
 
-            // Procedural Walk Cycle (Diagonal leg swing + Body Bobbing + Weight Shift)
-            const walkCycle = animTime * 12.0 * speedMulti;
-            const legSwing = Math.sin(walkCycle) * 0.45;
-            
-            if (legFL) legFL.rotation.x = defaultRotations.legFL.x + legSwing;
-            if (legBR) legBR.rotation.x = defaultRotations.legBR.x + legSwing;
-            if (legFR) legFR.rotation.x = defaultRotations.legFR.x - legSwing;
-            if (legBL) legBL.rotation.x = defaultRotations.legBL.x - legSwing;
+            // Procedural Walk Cycle if no embedded walk clip
+            if (!activeMixer) {
+                const walkCycle = animTime * 12.0 * speedMulti;
+                const legSwing = Math.sin(walkCycle) * 0.45;
+                
+                if (legFL) legFL.rotation.x = defaultRotations.legFL.x + legSwing;
+                if (legBR) legBR.rotation.x = defaultRotations.legBR.x + legSwing;
+                if (legFR) legFR.rotation.x = defaultRotations.legFR.x - legSwing;
+                if (legBL) legBL.rotation.x = defaultRotations.legBL.x - legSwing;
 
-            // Upward vertical bobbing and roll weight shift
-            dogGroup.position.y = targetDogPosition.y + Math.abs(Math.sin(walkCycle * 2.0)) * 0.08;
-            dogGroup.rotation.z = Math.sin(walkCycle) * 0.04;
+                dogGroup.position.y = targetDogPosition.y + Math.abs(Math.sin(walkCycle * 2.0)) * 0.08;
+                dogGroup.rotation.z = Math.sin(walkCycle) * 0.04;
 
-            if (tailGroup) {
-                tailGroup.rotation.y = defaultRotations.tailGroup.y + Math.sin(walkCycle * 1.5) * 0.4;
+                if (tailGroup) {
+                    tailGroup.rotation.y = defaultRotations.tailGroup.y + Math.sin(walkCycle * 1.5) * 0.4;
+                }
             }
         } else {
             // Arrived at destination
@@ -620,7 +657,7 @@ function animate() {
         }
     }
 
-    // Update GLTF animation mixer if exists (e.g. Parrot)
+    // Update GLTF animation mixer if exists (e.g. Baby Dog or Parrot)
     if (activeMixer) {
         activeMixer.update(delta * speedMulti);
     }
