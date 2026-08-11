@@ -259,15 +259,15 @@ window.setPetType = function (type) {
             }
         });
 
-        // Model transformation parameters hand-tuned for prominent, larger visual display
+        // Model transformation parameters hand-tuned for prominent, balanced visual display
         const configs = {
             shiba:    { scale: 0.040, x: 0, y: -1.2,  z: 0, rotY: 0 },
             baby_dog: { scale: 3.3,   x: 0, y: -1.2,  z: 0, rotY: 0 },
-            poodle:   { scale: 0.52,  x: 0, y: -1.6,  z: 0, rotY: 0 },
-            pug:      { scale: 19.5,  x: 0, y: -1.2,  z: 0, rotY: 0 },
-            beagle:   { scale: 0.11,  x: 0, y: -1.2,  z: 0, rotY: 0 },
+            poodle:   { scale: 0.17,  x: 0, y: -0.9,  z: 0, rotY: 0 },
+            pug:      { scale: 6.5,   x: 0, y: -0.9,  z: 0, rotY: 0 },
+            beagle:   { scale: 0.055, x: 0, y: -0.9,  z: 0, rotY: 0 },
             cat:      { scale: 0.16,  x: 0, y: -1.2,  z: 0, rotY: 0 },
-            parrot:   { scale: 0.82,  x: 0, y: -1.2,  z: 0, rotY: 0 }
+            parrot:   { scale: 0.27,  x: 0, y: -0.9,  z: 0, rotY: 0 }
         };
 
         const config = configs[type] || configs.shiba;
