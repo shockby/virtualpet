@@ -210,7 +210,7 @@ window.setPetType = function (type) {
             pug:      { scale: 13.2,  x: 0, y: -0.9,  z: 0, rotY: 0 },
             beagle:   { scale: 0.072, x: 0, y: -0.9,  z: 0, rotY: 0 },
             cat:      { scale: 0.16,  x: 0, y: -0.9,  z: 0, rotY: 0 },
-            parrot:   { scale: 0.54,  x: 0, y: -0.9,  z: 0, rotY: 0 }
+            parrot:   { scale: 23.0,  x: 0, y: -0.9,  z: 0, rotY: 0 }
         };
 
         const config = configs[type] || configs.shiba;
