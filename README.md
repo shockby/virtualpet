@@ -95,5 +95,5 @@ npx wrangler pages deploy .
 - Beagle by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/0BnDT3T1wTE)
 - Poodle by jeremy [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/2ig2NlSneau)
 - Pug by Workshop apelab [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/f1YBNg2R0nj)
-- Kitten by Poly by Google [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/dBJgGEu5bHW)
+- "An Animated Cat" (https://skfb.ly/6YPwH) by Evil_Katz [CC-BY 4.0] (http://creativecommons.org/licenses/by/4.0/) via Sketchfab
 - "Love Birds Parrot" (https://skfb.ly/oLuSK) by Nyilonelycompany [CC BY-NC 4.0] (http://creativecommons.org/licenses/by-nc/4.0/) via Sketchfab
